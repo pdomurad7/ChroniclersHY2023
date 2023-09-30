@@ -22,6 +22,11 @@ class CryptocurrencyManualRates(BaseModel):
 
 
 class PreviewReport(BaseModel):
+    name: str
+    id: str
+    case_number: str
+    owner_data: str
+    value_currency: str
     cryptocurrencies_amount: list[CryptocurrencyAmount]
     cryptocurrency_manual_rates: list[CryptocurrencyManualRates]
 

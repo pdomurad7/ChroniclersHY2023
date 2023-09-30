@@ -29,9 +29,9 @@ class PdfGenerator:
         for cryptocurrency in self.data["cryptocurrencies_data"]:
             self.pdf.chapter_title(f"Cryptocurrency Name: {cryptocurrency['name']}")
             self.pdf.chapter_body(f"Quantity: {cryptocurrency['quantity']}")
-            self.pdf.chapter_body(
-                f"NBP USD Avg. Rate: {cryptocurrency['NBP_USD_rate']}"
-            )
+            # self.pdf.chapter_body(  # TODO: uncomment after mentors review (probably)
+            #     f"NBP USD Avg. Rate: {cryptocurrency['NBP_USD_rate']}"
+            # )
             self.pdf.chapter_body(
                 f"Data Sources: {', '.join(cryptocurrency['data_sources'])}"
             )
