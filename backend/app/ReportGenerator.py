@@ -1,7 +1,9 @@
 class ReportGenerator:
     def __init__(self, previous_report_data: dict):
         self.cryptocurrencies_amount = previous_report_data["cryptocurrencies_amount"]
-        self.cryptocurrency_manual_rates = previous_report_data["cryptocurrency_manual_rates"]
+        self.cryptocurrency_manual_rates = previous_report_data[
+            "cryptocurrency_manual_rates"
+        ]
 
 
 data = {
