@@ -14,7 +14,10 @@ class ICantor(ABC):
 
 class Zonda(ICantor):
     def __init__(self):
-        super().__init__(url="https://api.zondacrypto.exchange/rest/trading/ticker/", name="ZondaCrypto")
+        super().__init__(
+            url="https://api.zondacrypto.exchange/rest/trading/ticker/",
+            name="ZondaCrypto",
+        )
 
     def _get_url(self, cryptocurrency_name: str, currency: str):
         url = f"{self.url}{cryptocurrency_name}-{currency}"

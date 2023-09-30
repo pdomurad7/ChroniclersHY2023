@@ -1,5 +1,5 @@
-from app.models import Report
-from app.utils.ReportGenerator import ReportGenerator
+from models import Report
+from utils.ReportGenerator import ReportGenerator
 
 
 def get_current_supported_currencies(db):

@@ -1,4 +1,4 @@
-from app.services import get_report_calculations
+from services import get_report_calculations
 
 import json
 
@@ -9,7 +9,7 @@ from PdfGenerator import PdfGenerator
 from config import settings
 from dependecies import get_db
 from services import get_current_supported_currencies
-from app.models import Report, ResponseReport
+from models import Report, ResponseReport
 
 app = FastAPI()
 
