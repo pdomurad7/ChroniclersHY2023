@@ -1,3 +1,8 @@
+from fastapi import FastAPI, Depends
+from app.dependecies import get_db
+from app.services import get_current_supported_currencies, get_preview_report_calculations
+
+from app.pydantic import PreviewReport, ResponseReport
 import json
 
 from fastapi import FastAPI, HTTPException, Depends
@@ -10,7 +15,6 @@ from models import PreviewReport, ResponseReport
 from services import get_current_supported_currencies, get_preview_report_calculations
 
 app = FastAPI()
-
 
 @app.get("/cryptocurrencies")
 def get_supported_currencies(db=Depends(get_db)):
