@@ -1,5 +1,7 @@
-from pydantic import BaseModel
 from typing import Optional
+
+from fpdf import FPDF
+from pydantic import BaseModel
 
 
 class CryptocurrencyRate(BaseModel):
@@ -62,3 +64,24 @@ class ResponseReport(BaseModel):
     calculation_method: str
     cryptocurrencies_data: list[SingleCryptocurrenciesData]
     exchange_data: list[CantorData]
+
+
+class PDF(FPDF):
+    def header(self):
+        self.set_font("Arial", "B", 12)
+        self.cell(0, 10, "Crypto Asset Valuation Report", align="C", ln=True)
+        self.ln(10)
+
+    def chapter_title(self, title):
+        self.set_font("Arial", "B", 12)
+        self.cell(0, 10, title, ln=True, align="L")
+        self.ln(4)
+
+    def chapter_body(self, body):
+        self.set_font("Arial", "", 12)
+        self.multi_cell(0, 10, body)
+        self.ln(2)
+
+    def add_line(self):
+        self.line(10, self.get_y(), 200, self.get_y())
+        self.ln(4)

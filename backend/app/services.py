@@ -1,4 +1,4 @@
-from app.pydantic import PreviewReport
+from models import PreviewReport
 
 
 def get_current_supported_currencies(db):
