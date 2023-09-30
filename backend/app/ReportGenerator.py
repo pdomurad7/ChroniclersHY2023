@@ -1,10 +1,43 @@
+from app.cantors.CantorInterface import known_cantors
+import requests
+
+
 class ReportGenerator:
     def __init__(self, previous_report_data: dict):
         self.cryptocurrencies_amount = previous_report_data["cryptocurrencies_amount"]
-        self.cryptocurrency_manual_rates = previous_report_data[
-            "cryptocurrency_manual_rates"
-        ]
+        self.cryptocurrency_manual_rates = previous_report_data["cryptocurrency_manual_rates"]
+        self.cryptocurrencies_data = []
+        self.exchange_data = []
+        self.nbp_usd_rate = self._get_nbp_usd_rate()
 
+    def known_cantors_rates(self):
+        for cantor in known_cantors:
+            cantor_obj = cantor()
+            cantor_dict = {"url": cantor_obj.url, "name": cantor_obj.name, "cryptocurrency_rates": []}
+            for cryptocurrency in self.cryptocurrencies_amount:
+                crypto_rate = {}
+                result_rate = cantor_obj.get_rate(cryptocurrency["name"])
+                if result_rate is not None:
+                    if result_rate["currency"] == "USD":
+                        crypto_rate["converted_from_USD"] = True
+                        crypto_rate["USD_rate"] = float(result_rate["result"])
+                        crypto_rate["PLN_rate"] = result_rate["result"] * self.nbp_usd_rate
+                    else:
+                        crypto_rate["converted_from_USD"] = False
+                        crypto_rate["PLN_rate"] = result_rate["result"]
+                    crypto_rate["code"] = cryptocurrency["name"]
+                    crypto_rate["quantity"] = cryptocurrency["quantity"]
+                    crypto_rate["value"] = float(crypto_rate["PLN_rate"]) * cryptocurrency["quantity"]
+                cantor_dict["cryptocurrency_rates"].append(crypto_rate)
+            self.exchange_data.append(cantor_dict)
+
+    @staticmethod
+    def _get_nbp_usd_rate():
+        url = "http://api.nbp.pl/api/exchangerates/tables/A/last/1/"
+        response = requests.get(url).json()
+        for rate in response[0]["rates"]:
+            if rate["code"] == "USD":
+                return rate["mid"]
 
 data = {
     "name": "Crypto Asset Valuation",

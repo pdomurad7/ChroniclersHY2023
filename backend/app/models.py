@@ -1,7 +1,6 @@
-from typing import Optional
-
 from fpdf import FPDF
 from pydantic import BaseModel
+from typing import Optional
 
 
 class CryptocurrencyRate(BaseModel):
@@ -46,7 +45,11 @@ class SingleCryptocurrenciesData(BaseModel):
 class CantorCryptocurrencyData(BaseModel):
     code: str
     PLN_rate: float | None
+<<<<<<< HEAD
     USD_rate: float | None
+=======
+    USD_rate: float | None = None
+>>>>>>> d310be8 (dupa)
     quantity: float
     converted_from_USD: Optional[bool]
     NBP_USD_rate: float
