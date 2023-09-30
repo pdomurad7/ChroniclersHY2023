@@ -1,5 +1,6 @@
 import os
 
+
 # TODO: handle fastapi settings with env
 class Settings:
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
