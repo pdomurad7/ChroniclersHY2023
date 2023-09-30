@@ -4,18 +4,20 @@ import datetime
 
 
 class ReportGenerator:
-    def __init__(self, previous_report_data: dict):
+    def __init__(self, previous_report_data: dict, db):
         self.report_header = {
             "name": previous_report_data["name"],
             "id": previous_report_data["id"],
             "date": str(datetime.datetime.now().isoformat()),
             "case_number": previous_report_data["case_number"],
             "owner_data": previous_report_data["owner_data"],
-            "value_currency": previous_report_data["value_currency"]
+            "value_currency": previous_report_data["value_currency"],
+            "calculation_method": "Average of all available rates",
         }
         self.cryptocurrencies_amount = previous_report_data["cryptocurrencies_amount"]
         self.cryptocurrency_manual_rates = previous_report_data["cryptocurrency_manual_rates"]
         self.nbp_usd_rate = self._get_nbp_usd_rate()
+        self.db = db
         self.cryptocurrencies_data = []
         self.exchange_data = []
 
@@ -38,7 +40,8 @@ class ReportGenerator:
             for cantor in self.exchange_data:
                 for rate in cantor["cryptocurrency_rates"]:
                     if rate["code"] == cryptocurrency["name"]:
-                        cryptocurrency_dict["data_sources"].append(cantor["name"])
+                        if cantor["name"] not in cryptocurrency_dict["data_sources"]:
+                            cryptocurrency_dict["data_sources"].append(cantor["name"])
                         cryptocurrency_dict["avg_value"] += rate["value"]
             cryptocurrency_dict["avg_value"] /= len(cryptocurrency_dict["data_sources"])
             self.cryptocurrencies_data.append(cryptocurrency_dict)
@@ -58,6 +61,7 @@ class ReportGenerator:
                     else:
                         crypto_rate["converted_from_USD"] = False
                         crypto_rate["PLN_rate"] = result_rate["result"]
+                    crypto_rate["NBP_USD_rate"] = self.nbp_usd_rate
                     crypto_rate["code"] = cryptocurrency["name"]
                     crypto_rate["quantity"] = cryptocurrency["quantity"]
                     crypto_rate["value"] = float(crypto_rate["PLN_rate"]) * cryptocurrency["quantity"]
@@ -74,8 +78,16 @@ class ReportGenerator:
                     if rate["name"] == cryptocurrency["name"]:
                         crypto_rate["code"] = cryptocurrency["name"]
                         crypto_rate["quantity"] = cryptocurrency["quantity"]
-                        crypto_rate["PLN_rate"] = rate["rate"]
+                        if rate["currency"] == "USD":
+                            crypto_rate["converted_from_USD"] = True
+                            crypto_rate["USD_rate"] = rate["rate"]
+                            crypto_rate["PLN_rate"] = rate["rate"] * self.nbp_usd_rate
+                        else:
+                            crypto_rate["converted_from_USD"] = False
+                            crypto_rate["PLN_rate"] = rate["rate"]
+                        crypto_rate["NBP_USD_rate"] = self.nbp_usd_rate
                         crypto_rate["value"] = float(crypto_rate["PLN_rate"]) * cryptocurrency["quantity"]
+
                 if crypto_rate:
                     cantor_dict["cryptocurrency_rates"].append(crypto_rate)
             self.exchange_data.append(cantor_dict)

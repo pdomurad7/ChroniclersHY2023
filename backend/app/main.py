@@ -1,8 +1,5 @@
-from fastapi import FastAPI, Depends
-from app.dependecies import get_db
-from app.services import get_current_supported_currencies, get_preview_report_calculations
+from app.services import get_report_calculations
 
-from app.pydantic import PreviewReport, ResponseReport
 import json
 
 from fastapi import FastAPI, HTTPException, Depends
@@ -11,19 +8,20 @@ from fastapi import Response
 from PdfGenerator import PdfGenerator
 from config import settings
 from dependecies import get_db
-from models import PreviewReport, ResponseReport
-from services import get_current_supported_currencies, get_preview_report_calculations
+from services import get_current_supported_currencies
+from app.models import Report, ResponseReport
 
 app = FastAPI()
+
 
 @app.get("/cryptocurrencies")
 def get_supported_currencies(db=Depends(get_db)):
     return get_current_supported_currencies(db)
 
 
-@app.get("/preview-report", response_model=ResponseReport)
-def get_preview_report(preview_report: PreviewReport):
-    return get_preview_report_calculations(preview_report)
+@app.get("/report", response_model=ResponseReport)
+def get_preview_report(report: Report, db=Depends(get_db)):
+    return get_report_calculations(report, db)
 
 
 @app.get("/chief-names")
@@ -33,7 +31,7 @@ def list_chief_names():
 
 
 @app.post("/report/pdf")
-def get_report_pdf(report: PreviewReport):
+def get_report_pdf(report: Report):
     report = get_preview_report(report).model_dump()
 
     try:
