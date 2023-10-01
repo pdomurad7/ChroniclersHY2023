@@ -4,6 +4,7 @@ import json
 
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi import Response
+from fastapi.middleware.cors import CORSMiddleware
 
 from PdfGenerator import PdfGenerator
 from config import settings
@@ -21,7 +22,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 @app.get("/cryptocurrencies")
 def get_supported_currencies(db=Depends(get_db)):
     return get_current_supported_currencies(db)
@@ -30,7 +30,6 @@ def get_supported_currencies(db=Depends(get_db)):
 @app.get("/report", response_model=ResponseReport)
 def get_preview_report(report: Report, db=Depends(get_db)):
     return get_report_calculations(report, db)
-
 
 @app.get("/chief-names")
 def list_chief_names():
