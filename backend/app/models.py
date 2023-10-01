@@ -22,7 +22,8 @@ class CryptocurrencyManualRates(BaseModel):
 
 
 class Report(BaseModel):
-    name: str | None = "Assessing values of crypto-assets"
+    title: str | None = "Assessing values of crypto-assets"
+    name: str | None = None  # name of the tax chief officer
     case_number: str | None = None
     owner_data: str | None = None
     value_currency: str | None = None
@@ -60,6 +61,7 @@ class CantorData(BaseModel):
 
 class ResponseReport(BaseModel):
     name: str
+    officer_name: str
     id: str
     date: str
     case_number: str

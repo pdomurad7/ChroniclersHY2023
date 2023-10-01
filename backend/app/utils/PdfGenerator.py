@@ -29,6 +29,7 @@ class PdfGenerator:
         self.pdf.chapter_body(f"Date: {self.data['date']}")
         self.pdf.chapter_body(f"Case Number: {self.data['case_number']}")
         self.pdf.chapter_body(f"Owner Data: {self.data['owner_data']}")
+        self.pdf.chapter_body(f"Tax Office Chief: {self.data['officer_name']}")
         self.pdf.add_line()
 
     def _add_cryptocurrency_data(self):
