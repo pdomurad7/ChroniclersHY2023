@@ -1,16 +1,15 @@
-from services import get_report_calculations
-
 import json
 
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi import Response
 from fastapi.middleware.cors import CORSMiddleware
 
-from PdfGenerator import PdfGenerator
 from config import settings
 from dependecies import get_db
-from services import get_current_supported_currencies
 from models import Report, ResponseReport
+from services import get_current_supported_currencies
+from services import get_report_calculations
+from utils.PdfGenerator import PdfGenerator
 
 app = FastAPI()
 
@@ -22,6 +21,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/cryptocurrencies")
 def get_supported_currencies(db=Depends(get_db)):
     return get_current_supported_currencies(db)
@@ -31,6 +31,7 @@ def get_supported_currencies(db=Depends(get_db)):
 def get_preview_report(report: Report, db=Depends(get_db)):
     return get_report_calculations(report, db)
 
+
 @app.get("/chief-names")
 def list_chief_names():
     with open(settings.CHIEF_NAMES_PATH, "r", encoding="utf-8") as f:
@@ -39,7 +40,7 @@ def list_chief_names():
 
 @app.post("/report/pdf")
 def get_report_pdf(report: Report):
-    report = get_preview_report(report).model_dump()
+    report = get_preview_report(report)
 
     try:
         pdf_report = PdfGenerator(report).generate_pdf()
