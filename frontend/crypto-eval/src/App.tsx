@@ -1,5 +1,6 @@
 import React from 'react';
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
+import _ from 'lodash';
 import {
 	InputLabel,
 	Select,
@@ -43,11 +44,11 @@ const labels = {
 
 const cryptoCurrencyDataLabels: any = {
 	cryptoCurrencyName: {
-		name: 'cryptoCurrencyName',
+		name: 'cryptocurrencyName',
 		label: 'Nazwa kryptoaktywa',
 	},
 	cryptoCurrencyAmount: {
-		name: 'cryptoCurrencyAmount',
+		name: 'cryptocurrencyAmount',
 		label: 'Ilość',
 	},
 };
@@ -121,7 +122,7 @@ const DataForm = () => {
 					>
 						{chiefNames?.map((name: any, index: any) => (
 							<MenuItem key={index} value={name}>
-								{name}
+				c			{name}
 							</MenuItem>
 						))}
 					</Select>
@@ -548,7 +549,7 @@ export const ReportPreview = () => {
 	const formattedCryptoCurrenciesAmount =
 		reportContext?.report?.cryptocurrenciesAmount?.map((crypto: any) => ({
 			name: crypto.cryptoCurrencyName,
-			amount: crypto.cryptoCurrencyAmount,
+			quantity: crypto.cryptoCurrencyAmount,
 		}));
 
 	const formattedCryptoCurrenciesManualRates =
@@ -572,21 +573,32 @@ export const ReportPreview = () => {
 			return {
 				url: crypto.url,
 				name: crypto.name,
-				cryptocurrencyRates: formattedCryptoCurrenciesManualRates,
+				cryptocurrency_rates: formattedCurrencyRates,
 			};
 		});
 
 	const reportFormatted = {
-		cryptoCurrenciesAmount: formattedCryptoCurrenciesAmount,
-		cryptoCurrenciesManualRates: formattedCryptoCurrenciesManualRates,
+		cryptocurrenciesAmount: formattedCryptoCurrenciesAmount,
+		cryptocurrencyManualRates: formattedCryptoCurrenciesManualRates,
 	};
 
 	React.useEffect(() => {
 		const asyncReq = async (report: any) => {
-			const response = await postReport(report);
+			const reportFormatted = _.mapKeys(report, (value, key) =>
+				_.snakeCase(key)
+			);
+			const response = await postReport(reportFormatted);
 			console.log(response.data)
 		}
-		asyncReq(reportFormatted);
+		// values of reportFormatted not null
+		let yep = false;
+		Object.values(reportFormatted).forEach(value => {
+			if(value !== undefined && value === null) {
+				yep = true;
+			}
+		})
+		if(!yep)
+			asyncReq(reportFormatted);
 	}, [reportContext]);
 
 
