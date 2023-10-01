@@ -1,6 +1,8 @@
-from cantors.CantorInterface import known_cantors
-import requests
 import datetime
+
+import requests
+
+from cantors.CantorInterface import known_cantors
 
 
 class ReportGenerator:

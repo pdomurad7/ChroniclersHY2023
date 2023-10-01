@@ -1,6 +1,7 @@
-from pydantic import BaseModel
 from typing import Optional
+
 from fpdf import FPDF
+from pydantic import BaseModel
 
 
 class CryptocurrencyRate(BaseModel):
