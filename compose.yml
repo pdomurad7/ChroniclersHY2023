@@ -1,0 +1,26 @@
+services:
+  web:
+    build: backend
+    image: "${PROJECT_NAME}-web-image"
+    container_name: "${PROJECT_NAME}-web"
+    command: /entrypoint.sh
+    env_file:
+      - .env
+    volumes:
+      - ./backend/app:/app
+    ports:
+      - "${API_PORT}:8000"
+
+  frontend:
+    build: frontend
+    image: "${PROJECT_NAME}-frontend-image"
+    container_name: "${PROJECT_NAME}-frontend"
+    command: /entrypoint.sh
+    env_file:
+      - .env
+    volumes:
+      - ./frontend/crypto-eval:/app
+    ports:
+      - "${FRONTEND_PORT}:3000"
+    depends_on:
+      - web
