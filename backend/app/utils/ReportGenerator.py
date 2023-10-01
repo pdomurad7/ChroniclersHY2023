@@ -45,6 +45,7 @@ class ReportGenerator:
                 "quantity": cryptocurrency["quantity"],
                 "data_sources": [],
                 "avg_value": 0,
+                "NBP_USD_rate": self.nbp_usd_rate,
             }
             for cantor in self.exchange_data:
                 for rate in cantor["cryptocurrency_rates"]:
@@ -76,7 +77,6 @@ class ReportGenerator:
                     else:
                         crypto_rate["converted_from_USD"] = False
                         crypto_rate["PLN_rate"] = result_rate["result"]
-                    crypto_rate["NBP_USD_rate"] = self.nbp_usd_rate
                     crypto_rate["code"] = cryptocurrency["name"]
                     crypto_rate["quantity"] = cryptocurrency["quantity"]
                     crypto_rate["value"] = (
@@ -106,7 +106,6 @@ class ReportGenerator:
                         else:
                             crypto_rate["converted_from_USD"] = False
                             crypto_rate["PLN_rate"] = rate["rate"]
-                        crypto_rate["NBP_USD_rate"] = self.nbp_usd_rate
                         crypto_rate["value"] = (
                             float(crypto_rate["PLN_rate"]) * cryptocurrency["quantity"]
                         )

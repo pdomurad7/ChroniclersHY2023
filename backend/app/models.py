@@ -40,6 +40,7 @@ class SingleCryptocurrenciesData(BaseModel):
     quantity: float
     data_sources: list[str]
     avg_value: float
+    NBP_USD_rate: Optional[float]
 
 
 class CantorCryptocurrencyData(BaseModel):
@@ -48,7 +49,6 @@ class CantorCryptocurrencyData(BaseModel):
     USD_rate: float | None = None
     quantity: float
     converted_from_USD: bool = False
-    NBP_USD_rate: Optional[float]
     value: Optional[float]
 
 
