@@ -1,4 +1,5 @@
 import datetime
+import uuid
 
 import requests
 
@@ -9,8 +10,8 @@ class ReportGenerator:
     def __init__(self, previous_report_data: dict, db):
         self.report_header = {
             "name": previous_report_data["name"],
-            "id": previous_report_data["id"],
-            "date": str(datetime.datetime.now().isoformat()),
+            "id": uuid.uuid4().hex,
+            "date": datetime.datetime.now().isoformat(),
             "case_number": previous_report_data["case_number"],
             "owner_data": previous_report_data["owner_data"],
             "value_currency": previous_report_data["value_currency"],

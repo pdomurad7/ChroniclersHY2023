@@ -45,7 +45,7 @@ class PdfGenerator:
             self.pdf.chapter_title(f"Exchange Name: {exchange['name']}")
             self.pdf.add_line()
             for cryptocurrency in exchange["cryptocurrency_rates"]:
-                if not cryptocurrency["USD_rate"] and not cryptocurrency["PLN_rate"]:
+                if "USD_rate" not in cryptocurrency and not cryptocurrency["PLN_rate"]:
                     self.pdf.chapter_body(
                         f"Cryptocurrency Code: {cryptocurrency['code']}"
                     )
