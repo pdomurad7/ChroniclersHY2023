@@ -27,7 +27,7 @@ def get_supported_currencies(db=Depends(get_db)):
     return get_current_supported_currencies(db)
 
 
-@app.get("/report", response_model=ResponseReport)
+@app.post("/report", response_model=ResponseReport)
 def get_preview_report(report: Report, db=Depends(get_db)):
     return get_report_calculations(report, db)
 
