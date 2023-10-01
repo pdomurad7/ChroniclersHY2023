@@ -22,7 +22,7 @@ class CryptocurrencyManualRates(BaseModel):
 
 
 class Report(BaseModel):
-    name: str | None = None
+    name: str | None = "Assessing values of crypto-assets"
     case_number: str | None = None
     owner_data: str | None = None
     value_currency: str | None = None

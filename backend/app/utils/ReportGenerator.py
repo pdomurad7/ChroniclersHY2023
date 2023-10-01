@@ -11,7 +11,7 @@ class ReportGenerator:
         self.report_header = {
             "name": previous_report_data["name"],
             "id": uuid.uuid4().hex,
-            "date": datetime.datetime.now().isoformat(),
+            "date": str(datetime.datetime.now().strftime("%d.%m.%Y")),
             "case_number": previous_report_data["case_number"],
             "owner_data": previous_report_data["owner_data"],
             "value_currency": previous_report_data["value_currency"],
@@ -54,6 +54,7 @@ class ReportGenerator:
                             cryptocurrency_dict["data_sources"].append(cantor["name"])
                         cryptocurrency_dict["avg_value"] += rate["value"]
             cryptocurrency_dict["avg_value"] /= len(cryptocurrency_dict["data_sources"])
+            cryptocurrency_dict["avg_value"] = round(cryptocurrency_dict["avg_value"], 2)
             self.cryptocurrencies_data.append(cryptocurrency_dict)
 
     def _known_cantors_rates(self):
