@@ -64,5 +64,11 @@ export type Report = {
 }
 
 export const postReport = async (report: any) => {
-    return await post(ENDPOINTS.REPORT, report);
+    try {
+        return await post(ENDPOINTS.REPORT, report);
+    }
+    catch (error) {
+        // console.log(error)
+        return null;
+    }
 }

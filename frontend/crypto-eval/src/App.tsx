@@ -15,6 +15,7 @@ import {
 	Card,
 	CardContent,
 	CardActions,
+	Divider,
 } from '@mui/material';
 import { useQuery } from 'react-query';
 import { getChiefNames, getCryptoCurrencies, postReport } from './api';
@@ -97,14 +98,37 @@ const DataForm = () => {
 		},
 		mode: 'onChange',
 	});
-
-	const watchedFields = watch();
-
 	const { data: chiefNames } = useQuery('chiefNames', getChiefNames);
+	const reportContext = React.useContext(ReportContext);
+	const watchAllFields = watch();
+	const prevWatchAllFieldsRef = React.useRef({
+		enforcementAuthority: '',
+		caseNumber: '',
+		ownerData: '',
+	});
+
+	React.useEffect(() => {
+		if (
+			JSON.stringify(prevWatchAllFieldsRef.current) !==
+			JSON.stringify(watchAllFields)
+		) {
+			reportContext.setReport((prevValue: any) => ({
+				...prevValue,
+				basic: {
+					...watchAllFields,
+				},
+			}));
+		}
+
+		prevWatchAllFieldsRef.current = watchAllFields;
+	}, [watchAllFields]);
 
 	return (
 		<Box
+			component={Paper}
+			elevation={3}
 			sx={{
+				p: '2em',
 				display: 'flex',
 				flexDirection: 'column',
 				gap: '1em',
@@ -115,17 +139,24 @@ const DataForm = () => {
 				name='enforcementAuthority'
 				control={control}
 				render={({ field }) => (
-					<Select
-						{...field}
-						label={labels.enforcementAuthority.label}
-						id='enforcementAuthority-label'
-					>
-						{chiefNames?.map((name: any, index: any) => (
-							<MenuItem key={index} value={name}>
-				c			{name}
-							</MenuItem>
-						))}
-					</Select>
+					<>
+						<Select
+							{...field}
+							id='enforcementAuthority'
+							label={labels.enforcementAuthority.label}
+							inputProps={{
+								sx: {
+									color: 'black',
+								},
+							}}
+						>
+							{chiefNames?.map((name: any, index: any) => (
+								<MenuItem key={index} value={name}>
+									{name}
+								</MenuItem>
+							))}
+						</Select>
+					</>
 				)}
 			/>
 			<Controller
@@ -299,12 +330,18 @@ export const CryptoCurrencyWrapper = () => {
 	);
 
 	return (
-		<Box sx={{ display: 'flex', gap: '2em' }}>
-			<CryptoCurrencyDataForm onAppend={onAppend} />
+		<Box
+			component={Paper}
+			elevation={3}
+			sx={{ display: 'flex', gap: '2em', p: '2em' }}
+		>
+			{' '}
+			<CryptoCurrencyDataForm onAppend={onAppend} />{' '}
 			<Box
 				sx={{
 					overflowY: 'auto',
 					maxHeight: '400px',
+					minHeight: '400px',
 					width: '500px',
 					flex: 1,
 				}}
@@ -339,7 +376,7 @@ export const Record: React.FC<any> = ({
 	onRemove,
 }: any) => {
 	return (
-		<Card variant='outlined'>
+		<Card elevation={3}>
 			<CardContent>
 				<Box display='flex' flexDirection='column'>
 					{labelValues.map((lv: any, i: any) => (
@@ -361,13 +398,18 @@ export const CryptoCurrencySourceForm = ({ onAppend }: any) => {
 	const {
 		control,
 		handleSubmit,
-		register,
 		formState: { errors },
 	} = useForm();
-	const { data: cryptoCurrencyData } = useQuery(
-		'cryptoCurrencyData',
-		getCryptoCurrencies
-	);
+	const reportContext = React.useContext(ReportContext);
+	const amountList = reportContext.report?.cryptocurrenciesAmount;
+	const uniqueCryptoCurrencyNames =
+		Array.from(
+			new Set(
+				amountList?.map(
+					(crypto: any) => crypto.cryptoCurrencyName?.toString() || ''
+				)
+			)
+		) || [];
 
 	return (
 		<Box
@@ -425,12 +467,12 @@ export const CryptoCurrencySourceForm = ({ onAppend }: any) => {
 						/>
 					)}
 				/>
-				{cryptoCurrencyData?.length > 0 &&
-					cryptoCurrencyData.map((crypto: any, index: any) => {
+				{uniqueCryptoCurrencyNames?.length > 0 &&
+					uniqueCryptoCurrencyNames.map((crypto: any, index: any) => {
 						return (
 							<Box key={index}>
 								<Controller
-									name={`${crypto.code}`}
+									name={`${crypto}`}
 									control={control}
 									rules={{
 										required: 'Pole wymagane',
@@ -439,7 +481,7 @@ export const CryptoCurrencySourceForm = ({ onAppend }: any) => {
 									render={({ field }) => (
 										<TextField
 											error={Boolean(errors.cryptoRate)}
-											label={`Kurs ${crypto.code}`}
+											label={`Kurs ${crypto}`}
 											helperText={
 												errors.cryptoRate?.message
 											}
@@ -449,7 +491,7 @@ export const CryptoCurrencySourceForm = ({ onAppend }: any) => {
 									)}
 								/>
 								<Controller
-									name={`${crypto.code}Currency`}
+									name={`${crypto}Currency`}
 									control={control}
 									defaultValue='PLN'
 									render={({ field }) => (
@@ -511,18 +553,38 @@ const CryptoCurrencySourceWrapper = () => {
 	}, [cryptoCurrencyData]);
 
 	return (
-		<Box sx={{ display: 'flex', gap: '2em' }}>
+		<Box
+			component={Paper}
+			elevation={3}
+			sx={{ display: 'flex', gap: '2em', p: '2em' }}
+		>
 			<CryptoCurrencySourceForm onAppend={onAppend} />
-			<Box sx={{ overflowY: 'auto', maxHeight: '400px' }}>
+			<Box
+				sx={{
+					overflowY: 'auto',
+					maxHeight: '600px',
+					minHeight: '600px',
+				}}
+			>
 				<Grid container spacing={2}>
 					{dataList.map((cryptoCurrencySource, index) => {
-						console.log(dataList, cryptoCurrencySourceLabels);
+						console.log(
+							'labelValues (keys)',
+							Object.keys(cryptoCurrencySource)
+						);
+						console.log(
+							'labels default',
+							cryptoCurrencySourceLabels
+						);
+
 						const labelValues = Object.keys(
 							cryptoCurrencySource
-						).map((key: string) => ({
-							label: cryptoCurrencySourceLabels[key].label,
-							value: cryptoCurrencySource[key],
-						}));
+						).map((key: string) => {
+							return {
+								label: key,
+								value: cryptoCurrencySource[key],
+							};
+						});
 
 						return (
 							<Grid item xs={12} key={index}>
@@ -544,12 +606,12 @@ const CryptoCurrencySourceWrapper = () => {
 
 export const ReportPreview = () => {
 	const reportContext = React.useContext(ReportContext);
-	console.log(reportContext);
+	const [reportPreview, setReportPreview] = React.useState<any>();
 
 	const formattedCryptoCurrenciesAmount =
 		reportContext?.report?.cryptocurrenciesAmount?.map((crypto: any) => ({
 			name: crypto.cryptoCurrencyName,
-			quantity: crypto.cryptoCurrencyAmount,
+			quantity: Number(crypto.cryptoCurrencyAmount),
 		}));
 
 	const formattedCryptoCurrenciesManualRates =
@@ -557,18 +619,17 @@ export const ReportPreview = () => {
 			// reomve name and url
 			const { name, url, ...currencyRates } = crypto;
 			// using reduce
-			const formattedCurrencyRates: any = []
-			Object.keys(currencyRates).forEach(key => {
-				if(key.includes('Currency')) {
+			const formattedCurrencyRates: any = [];
+			Object.keys(currencyRates).forEach((key) => {
+				if (key.includes('Currency')) {
 					return;
 				}
 				formattedCurrencyRates.push({
 					name: key,
-					rate: currencyRates[key],
-					currency: currencyRates[`${key}Currency`]
-				})
+					rate: Number(currencyRates[key]),
+					currency: currencyRates[`${key}Currency`],
+				});
 			});
-
 
 			return {
 				url: crypto.url,
@@ -578,34 +639,204 @@ export const ReportPreview = () => {
 		});
 
 	const reportFormatted = {
-		cryptocurrenciesAmount: formattedCryptoCurrenciesAmount,
-		cryptocurrencyManualRates: formattedCryptoCurrenciesManualRates,
+		valueCurrency: 'PLN',
+		name: reportContext?.report?.basic?.enforcementAuthority || '',
+		caseNumber: reportContext?.report?.basic?.caseNumber || '',
+		ownerData: reportContext?.report?.basic?.ownerData || '',
+		cryptocurrenciesAmount: formattedCryptoCurrenciesAmount || [],
+		cryptocurrencyManualRates: formattedCryptoCurrenciesManualRates || [],
 	};
 
 	React.useEffect(() => {
 		const asyncReq = async (report: any) => {
+			// if (
+			// 	report.cryptocurrenciesAmount === undefined &&
+			// 	report.cryptocurrencyManualRates === undefined
+			// )
+			// 	return;
 			const reportFormatted = _.mapKeys(report, (value, key) =>
 				_.snakeCase(key)
 			);
 			const response = await postReport(reportFormatted);
-			console.log(response.data)
-		}
-		// values of reportFormatted not null
-		let yep = false;
-		Object.values(reportFormatted).forEach(value => {
-			if(value !== undefined && value === null) {
-				yep = true;
-			}
-		})
-		if(!yep)
-			asyncReq(reportFormatted);
+			setReportPreview(response);
+			console.log(response);
+		};
+		asyncReq(reportFormatted);
 	}, [reportContext]);
 
+	const date = new Date(reportPreview?.date);
+	const readableDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
 
-
+	if (!reportPreview) {
+		return (
+			<Box>
+				<Typography>Brak danych</Typography>
+			</Box>
+		);
+	}
 	return (
-		<Box>
-			<Typography>Podgląd raportu</Typography>
+		<Box
+			component={Paper}
+			elevation={5}
+			sx={{
+				p: '2em',
+				border: '1px solid black',
+				borderRadius: '8px',
+			}}
+		>
+			<Typography sx={{ fontWeight: 'bold' }} variant='h3'>
+				Podgląd raportu
+			</Typography>
+			<Divider sx={{ mt: '1em', mb: '1em' }} />
+			<Box>
+				<InputLabel>Nazwa organu egzekucyjnego</InputLabel>
+				<Typography>{reportPreview.name}</Typography>
+			</Box>
+			<Box>
+				<InputLabel>Dane właściciela kryptoaktywa</InputLabel>
+				<Typography>{reportPreview.owner_data}</Typography>
+			</Box>
+			<Box>
+				<InputLabel>ID raportu</InputLabel>
+				<Typography>{reportPreview.id}</Typography>
+			</Box>
+			<Box>
+				<InputLabel>Numer sprawy</InputLabel>
+				<Typography>{reportPreview.case_number}</Typography>
+			</Box>
+			<Box>
+				<InputLabel>Data raportu</InputLabel>
+				<Typography>{readableDate}</Typography>
+			</Box>
+			<Box>
+				<InputLabel>Metoda wyliczenia średniej</InputLabel>
+				<Typography>{reportPreview.calculation_method}</Typography>
+			</Box>
+			<Divider sx={{ mt: '1em', mb: '1em' }} />
+
+			{reportPreview.exchange_data.map(
+				(exchange_data: any, index: any) => {
+					return (
+						<Box
+							key={index}
+							sx={{
+								marginTop: '10px',
+								p: '1em',
+								borderRadius: '10px',
+								backgroundColor: '#f5f5f5',
+							}}
+						>
+							<Box>
+								<InputLabel>Kantor</InputLabel>
+								<Typography>{exchange_data.name}</Typography>
+							</Box>
+
+							<Box>
+								<InputLabel>Adres strony</InputLabel>
+								<Typography>{exchange_data.url}</Typography>
+							</Box>
+
+							<Box>
+								{exchange_data.cryptocurrency_rates.map(
+									(rate: any, index: any) => {
+										return (
+											<Box
+												key={index}
+												sx={{
+													marginTop: '10px',
+												}}
+											>
+												<Box>
+													<InputLabel>
+														NBP USD
+													</InputLabel>
+													<Typography>
+														{rate.NBP_USD_RATE}
+													</Typography>
+												</Box>
+												<Box>
+													<InputLabel>
+														PLN Rate
+													</InputLabel>
+													<Typography>
+														{rate.PLN_RATE}
+													</Typography>
+												</Box>
+												<Box>
+													<InputLabel>
+														Kryptowaluta
+													</InputLabel>
+													<Typography>
+														{rate.code}
+													</Typography>
+												</Box>
+												<Box>
+													<InputLabel>
+														Ilość
+													</InputLabel>
+													<Typography>
+														{rate.quantity}
+													</Typography>
+												</Box>
+												<Box>
+													<InputLabel>
+														Wartość (PLN)
+													</InputLabel>
+													<Typography>
+														{rate.value}
+													</Typography>
+												</Box>
+											</Box>
+										);
+									}
+								)}
+							</Box>
+
+							{/* when empty */}
+
+							{exchange_data.cryptocurrency_rates.length ===
+								0 && (
+								<Box sx={{ mt: '1em' }}>
+									<InputLabel>
+										Brak danych dla tego kantoru
+									</InputLabel>
+								</Box>
+							)}
+						</Box>
+					);
+				}
+			)}
+
+			<Divider sx={{ mt: '1em', mb: '1em' }} />
+
+			{reportPreview.cryptocurrencies_data.map(
+				(crypto: any, index: any) => {
+					return (
+						<Box
+							key={index}
+							sx={{
+								marginTop: '10px',
+							}}
+						>
+							<InputLabel>Kryptowaluta</InputLabel>
+							<Typography sx={{ fontWeight: 'bold' }}>
+								{crypto.name}
+							</Typography>
+							<InputLabel>Średnia wartość (PLN)</InputLabel>
+							<Typography>{crypto.avg_value}</Typography>
+							{crypto.data_sources.map(
+								(source: any, index: any) => {
+									return (
+										<Box key={index}>
+											<Typography>{source}</Typography>
+										</Box>
+									);
+								}
+							)}
+						</Box>
+					);
+				}
+			)}
 		</Box>
 	);
 };
@@ -613,15 +844,7 @@ export const ReportPreview = () => {
 const ReportContext = React.createContext<any>({});
 
 export const App = () => {
-	const { control, handleSubmit, register } = useForm({
-		defaultValues: {
-			enforcementAuthority: '',
-			caseNumber: '',
-			ownerData: '',
-		},
-	});
 	const [report, setReport] = React.useState({});
-	console.log(report);
 
 	return (
 		<Grid container spacing={0}>
