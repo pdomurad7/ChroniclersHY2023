@@ -251,11 +251,27 @@ export const CryptoCurrencyDataForm = ({ onAppend }: any) => {
 		'cryptoCurrencyData',
 		getCryptoCurrencies
 	);
+	const reportContext = React.useContext(ReportContext);
 
 	const cryptoCurrencyOptions = cryptoCurrencyData?.map(
 		(cryptoCurrency: any) =>
 			`${cryptoCurrency.name} (${cryptoCurrency.code})`
 	);
+
+	React.useEffect(() => {
+		const currencyMapper = cryptoCurrencyData?.reduce(
+			(acc: any, cryptoCurrency: any) => {
+				acc[`${cryptoCurrency.name} (${cryptoCurrency.code})`] =
+					cryptoCurrency;
+				return acc;
+			},
+			{}
+		);
+		reportContext.setReport((prevValue: any) => ({
+			...prevValue,
+			currencyMapper: currencyMapper,
+		}));
+	}, [cryptoCurrencyData]);
 
 	if (isLoading) {
 		return <div>Ładowanie...</div>;
@@ -610,10 +626,11 @@ export const ReportPreview = () => {
 
 	const formattedCryptoCurrenciesAmount =
 		reportContext?.report?.cryptocurrenciesAmount?.map((crypto: any) => ({
-			name: crypto.cryptoCurrencyName,
+			name: reportContext.report.currencyMapper[crypto.cryptoCurrencyName]
+				.code,
 			quantity: Number(crypto.cryptoCurrencyAmount),
 		}));
-
+	console.log('hehe', reportContext.report.currencyMapper);
 	const formattedCryptoCurrenciesManualRates =
 		reportContext?.report?.cryptocurrencyManualRates?.map((crypto: any) => {
 			// reomve name and url
@@ -736,6 +753,8 @@ export const ReportPreview = () => {
 								<Typography>{exchange_data.url}</Typography>
 							</Box>
 
+							<Divider sx={{ mt: '1em', mb: '1em' }} />
+
 							<Box>
 								{exchange_data.cryptocurrency_rates.map(
 									(rate: any, index: any) => {
@@ -748,20 +767,30 @@ export const ReportPreview = () => {
 											>
 												<Box>
 													<InputLabel>
-														NBP USD
+														Kurs NBP USD
 													</InputLabel>
 													<Typography>
-														{rate.NBP_USD_RATE}
+														{rate.NBP_USD_rate}
 													</Typography>
 												</Box>
 												<Box>
 													<InputLabel>
-														PLN Rate
+														Kurs PLN
 													</InputLabel>
 													<Typography>
-														{rate.PLN_RATE}
+														{rate.PLN_rate}
 													</Typography>
 												</Box>
+												{rate.USD_rate && (
+													<Box>
+														<InputLabel>
+															Kurs USD
+														</InputLabel>
+														<Typography>
+															{rate.USD_rate}
+														</Typography>
+													</Box>
+												)}
 												<Box>
 													<InputLabel>
 														Kryptowaluta
@@ -792,8 +821,6 @@ export const ReportPreview = () => {
 								)}
 							</Box>
 
-							{/* when empty */}
-
 							{exchange_data.cryptocurrency_rates.length ===
 								0 && (
 								<Box sx={{ mt: '1em' }}>
@@ -819,16 +846,16 @@ export const ReportPreview = () => {
 							}}
 						>
 							<InputLabel>Kryptowaluta</InputLabel>
-							<Typography sx={{ fontWeight: 'bold' }}>
-								{crypto.name}
-							</Typography>
+							<Typography>{crypto.name}</Typography>
 							<InputLabel>Średnia wartość (PLN)</InputLabel>
 							<Typography>{crypto.avg_value}</Typography>
+
+							<InputLabel>Źródła danych</InputLabel>
 							{crypto.data_sources.map(
 								(source: any, index: any) => {
 									return (
 										<Box key={index}>
-											<Typography>{source}</Typography>
+											<Typography>- {source}</Typography>
 										</Box>
 									);
 								}
@@ -845,6 +872,7 @@ const ReportContext = React.createContext<any>({});
 
 export const App = () => {
 	const [report, setReport] = React.useState({});
+	console.log(report);
 
 	return (
 		<Grid container spacing={0}>
