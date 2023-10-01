@@ -14,7 +14,7 @@ class PdfGenerator:
         return bytes(self.pdf.output())
 
     def _add_general_information(self):
-        self.pdf.chapter_title("General Information")
+        self.pdf.chapter_title("General Information", align="C")
         self.pdf.add_line()
         self.pdf.chapter_body(f"Report Name: {self.data['name']}")
         self.pdf.chapter_body(f"Report ID: {self.data['id']}")
@@ -24,7 +24,7 @@ class PdfGenerator:
         self.pdf.add_line()
 
     def _add_cryptocurrency_data(self):
-        self.pdf.chapter_title("Cryptocurrency Data")
+        self.pdf.chapter_title("Cryptocurrency Data", align="C")
         self.pdf.add_line()
         for cryptocurrency in self.data["cryptocurrencies_data"]:
             self.pdf.chapter_title(f"Cryptocurrency Name: {cryptocurrency['name']}")
@@ -39,11 +39,14 @@ class PdfGenerator:
         self.pdf.add_line()
 
     def _add_exchange_data(self):
-        self.pdf.chapter_title("Exchange Data")
+        self.pdf.chapter_title("Exchange Data", align="C")
         self.pdf.add_line()
         for exchange in self.data["exchange_data"]:
             self.pdf.chapter_title(f"Exchange Name: {exchange['name']}")
             self.pdf.add_line()
+            if not exchange["cryptocurrency_rates"]:
+                self.pdf.chapter_body("No data available")
+                return
             for cryptocurrency in exchange["cryptocurrency_rates"]:
                 self.pdf.chapter_body(f"Cryptocurrency Code: {cryptocurrency['code']}")
                 if cryptocurrency["USD_rate"]:

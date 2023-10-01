@@ -76,9 +76,9 @@ class PDF(FPDF):
         self.cell(0, 10, "Crypto Asset Valuation Report", align="C", ln=True)
         self.ln(10)
 
-    def chapter_title(self, title):
-        self.set_font("Helvetica", "B", 12)
-        self.cell(0, 10, title, ln=True, align="L")
+    def chapter_title(self, title, style="B", align="L"):
+        self.set_font("Helvetica", style, 12)
+        self.cell(0, 10, title, ln=True, align=align)
         self.ln(4)
 
     def chapter_body(self, body):
