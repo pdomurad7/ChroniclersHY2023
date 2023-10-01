@@ -38,12 +38,12 @@ class PdfGenerator:
             self.pdf.chapter_title(f"Cryptocurrency Name: {cryptocurrency['name']}")
             self.pdf.chapter_body(f"Quantity: {cryptocurrency['quantity']}")
             self.pdf.chapter_body(
-                f"NBP USD Avg. Rate: {cryptocurrency['NBP_USD_rate']}"
+                f"NBP USD Avg. Rate: {cryptocurrency['NBP_USD_rate']:.2f}"
             )
             self.pdf.chapter_body(
                 f"Data Sources: {', '.join(cryptocurrency['data_sources'])}"
             )
-            self.pdf.chapter_body(f"Average Value: {cryptocurrency['avg_value']}")
+            self.pdf.chapter_body(f"Average Value: {cryptocurrency['avg_value']:.2f}")
         self.pdf.add_line()
 
     def _add_exchange_data(self):
@@ -58,9 +58,9 @@ class PdfGenerator:
             for cryptocurrency in exchange["cryptocurrency_rates"]:
                 self.pdf.chapter_body(f"Cryptocurrency Code: {cryptocurrency['code']}")
                 if cryptocurrency["USD_rate"]:
-                    self.pdf.chapter_body(f"USD Rate: {cryptocurrency['USD_rate']}")
+                    self.pdf.chapter_body(f"USD Rate: {cryptocurrency['USD_rate']:.2f}")
                 self.pdf.chapter_body(
-                    f"PLN Rate: {cryptocurrency['PLN_rate']} {'(converted)' if cryptocurrency['converted_from_USD'] else ''}"
+                    f"PLN Rate: {cryptocurrency['PLN_rate']:.2f} {'(converted)' if cryptocurrency['converted_from_USD'] else ''}"
                 )
-                self.pdf.chapter_body(f"Value: {cryptocurrency['value']}")
+                self.pdf.chapter_body(f"Value: {cryptocurrency['value']:.2f}")
             self.pdf.add_line()

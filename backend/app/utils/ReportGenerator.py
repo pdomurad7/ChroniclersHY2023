@@ -68,9 +68,6 @@ class ReportGenerator:
                             cryptocurrency_dict["data_sources"].append(cantor["name"])
                         cryptocurrency_dict["avg_value"] += rate["value"]
             cryptocurrency_dict["avg_value"] /= len(cryptocurrency_dict["data_sources"])
-            cryptocurrency_dict["avg_value"] = round(
-                cryptocurrency_dict["avg_value"], 2
-            )
             self.cryptocurrencies_data.append(cryptocurrency_dict)
 
     def _known_cantors_rates(self):
