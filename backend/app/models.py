@@ -21,14 +21,14 @@ class CryptocurrencyManualRates(BaseModel):
     cryptocurrency_rates: list[CryptocurrencyRate]
 
 
-class PreviewReport(BaseModel):
-    name: str
-    id: str
-    case_number: str
-    owner_data: str
-    value_currency: str
-    cryptocurrencies_amount: list[CryptocurrencyAmount]
-    cryptocurrency_manual_rates: list[CryptocurrencyManualRates]
+class Report(BaseModel):
+    title: str | None = "Assessing values of crypto-assets"
+    name: str | None = None  # name of the tax chief officer
+    case_number: str | None = None
+    owner_data: str | None = None
+    value_currency: str | None = None
+    cryptocurrencies_amount: list[CryptocurrencyAmount] | None = None
+    cryptocurrency_manual_rates: list[CryptocurrencyManualRates] | None = None
 
 
 class CryptocurrencyAverageValue(BaseModel):
@@ -41,15 +41,15 @@ class SingleCryptocurrenciesData(BaseModel):
     quantity: float
     data_sources: list[str]
     avg_value: float
+    NBP_USD_rate: Optional[float]
 
 
 class CantorCryptocurrencyData(BaseModel):
     code: str
     PLN_rate: float | None
-    USD_rate: float | None
+    USD_rate: float | None = None
     quantity: float
-    converted_from_USD: Optional[bool]
-    NBP_USD_rate: float
+    converted_from_USD: bool = False
     value: Optional[float]
 
 
@@ -61,6 +61,7 @@ class CantorData(BaseModel):
 
 class ResponseReport(BaseModel):
     name: str
+    officer_name: str
     id: str
     date: str
     case_number: str
@@ -77,9 +78,9 @@ class PDF(FPDF):
         self.cell(0, 10, "Crypto Asset Valuation Report", align="C", ln=True)
         self.ln(10)
 
-    def chapter_title(self, title):
-        self.set_font("Helvetica", "B", 12)
-        self.cell(0, 10, title, ln=True, align="L")
+    def chapter_title(self, title, style="B", align="L"):
+        self.set_font("Helvetica", style, 12)
+        self.cell(0, 10, title, ln=True, align=align)
         self.ln(4)
 
     def chapter_body(self, body):

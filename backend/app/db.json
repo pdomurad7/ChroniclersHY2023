@@ -1,16 +1,16 @@
 {
-    "supported_cryptocurrencies": [
-        {
-            "name": "Bitcoin",
-            "code": "BTC"
-        },
-        {
-            "name": "Ethereum",
-            "code": "ETH"
-        },
-        {
-            "name": "Manchester City Fan Token",
-            "code": "CITY"
-        }
-    ]
+  "supported_cryptocurrencies": [
+    {
+      "name": "Bitcoin",
+      "code": "BTC"
+    },
+    {
+      "name": "Ethereum",
+      "code": "ETH"
+    },
+    {
+      "name": "Manchester City Fan Token",
+      "code": "CITY"
+    }
+  ]
 }
