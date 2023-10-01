@@ -12,9 +12,6 @@ logger = logging.getLogger(settings.PROJECT_NAME)
 
 class ReportGenerator:
     def __init__(self, previous_report_data: dict, db):
-        logger.info(
-            f"Generating report {previous_report_data['name']} with id {previous_report_data['id']} for user {previous_report_data['owner_data']}"
-        )
         self.report_header = {
             "name": previous_report_data["name"],
             "id": uuid.uuid4().hex,
@@ -24,6 +21,9 @@ class ReportGenerator:
             "value_currency": previous_report_data["value_currency"],
             "calculation_method": "Average of all available rates",
         }
+        logger.info(
+            f"Generating report {previous_report_data['name']} with id {self.report_header['id']} for user {previous_report_data['owner_data']}"
+        )
         self.cryptocurrencies_amount = previous_report_data["cryptocurrencies_amount"]
         self.cryptocurrency_manual_rates = previous_report_data[
             "cryptocurrency_manual_rates"
