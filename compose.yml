@@ -18,8 +18,8 @@ services:
     command: /entrypoint.sh
     env_file:
       - .env
-    volumes:
-      - ./frontend/crypto-eval:/app
+#    volumes:  # TODO: bug with npm and volumes (sick...)
+#      - ./frontend/crypto-eval:/app
     ports:
       - "${FRONTEND_PORT}:3000"
     depends_on:
