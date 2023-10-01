@@ -40,7 +40,7 @@ def list_chief_names():
 
 @app.post("/report/pdf")
 def get_report_pdf(report: Report):
-    report = get_preview_report(report)
+    report = ResponseReport(**get_preview_report(report)).model_dump()
 
     try:
         pdf_report = PdfGenerator(report).generate_pdf()
