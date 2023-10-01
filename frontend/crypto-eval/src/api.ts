@@ -8,7 +8,8 @@ const SERVER_URL = `http://${SERVER_HOST}:${SERVER_PORT}/`;
 const ENDPOINTS = {
     CHIEF_NAMES: 'chief-names',
     CRYPTOCURRENCIES: 'cryptocurrencies',
-    REPORT: 'report'
+    REPORT: 'report',
+    DOWNLOAD_REPORT: 'report/pdf'
 }
 
 
@@ -22,6 +23,12 @@ export const post = async (path: string, data: any) => {
     const url = SERVER_URL + path;
     const response = await axios.post(url, data);
     return response.data;
+}
+
+export const postBlob = async (path: string, data: any) => {
+    const url = SERVER_URL + path;
+    const response = await axios.post(url, data, {responseType: 'blob'});
+    return response;
 }
 
 
@@ -66,6 +73,16 @@ export type Report = {
 export const postReport = async (report: any) => {
     try {
         return await post(ENDPOINTS.REPORT, report);
+    }
+    catch (error) {
+        // console.log(error)
+        return null;
+    }
+}
+
+export const postReportPDF = async (report: any) => {
+    try {
+        return await postBlob(ENDPOINTS.DOWNLOAD_REPORT, report);
     }
     catch (error) {
         // console.log(error)

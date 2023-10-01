@@ -1,5 +1,6 @@
 import React from 'react';
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
+import {saveAs } from 'file-saver';
 import _ from 'lodash';
 import {
 	InputLabel,
@@ -18,7 +19,7 @@ import {
 	Divider,
 } from '@mui/material';
 import { useQuery } from 'react-query';
-import { getChiefNames, getCryptoCurrencies, postReport } from './api';
+import { getChiefNames, getCryptoCurrencies, postReport, postReportPDF } from './api';
 
 const labels = {
 	enforcementAuthority: {
@@ -630,7 +631,6 @@ export const ReportPreview = () => {
 				.code,
 			quantity: Number(crypto.cryptoCurrencyAmount),
 		}));
-	console.log('hehe', reportContext.report.currencyMapper);
 	const formattedCryptoCurrenciesManualRates =
 		reportContext?.report?.cryptocurrencyManualRates?.map((crypto: any) => {
 			// reomve name and url
@@ -666,23 +666,14 @@ export const ReportPreview = () => {
 
 	React.useEffect(() => {
 		const asyncReq = async (report: any) => {
-			// if (
-			// 	report.cryptocurrenciesAmount === undefined &&
-			// 	report.cryptocurrencyManualRates === undefined
-			// )
-			// 	return;
 			const reportFormatted = _.mapKeys(report, (value, key) =>
 				_.snakeCase(key)
 			);
 			const response = await postReport(reportFormatted);
 			setReportPreview(response);
-			console.log(response);
 		};
 		asyncReq(reportFormatted);
 	}, [reportContext]);
-
-	const date = new Date(reportPreview?.date);
-	const readableDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
 
 	if (!reportPreview) {
 		return (
@@ -723,7 +714,7 @@ export const ReportPreview = () => {
 			</Box>
 			<Box>
 				<InputLabel>Data raportu</InputLabel>
-				<Typography>{readableDate}</Typography>
+				<Typography>{reportPreview.date}</Typography>
 			</Box>
 			<Box>
 				<InputLabel>Metoda wyliczenia średniej</InputLabel>
@@ -871,8 +862,61 @@ export const ReportPreview = () => {
 const ReportContext = React.createContext<any>({});
 
 export const App = () => {
-	const [report, setReport] = React.useState({});
-	console.log(report);
+	const [report, setReport] = React.useState<any>();
+
+	const sendReport = async () => {
+		const formattedCryptoCurrenciesAmount =
+			report?.cryptocurrenciesAmount?.map(
+				(crypto: any) => ({
+					name: report.currencyMapper[
+						crypto.cryptoCurrencyName
+					].code,
+					quantity: Number(crypto.cryptoCurrencyAmount),
+				})
+			);
+		const formattedCryptoCurrenciesManualRates =
+			report?.cryptocurrencyManualRates?.map(
+				(crypto: any) => {
+					// reomve name and url
+					const { name, url, ...currencyRates } = crypto;
+					// using reduce
+					const formattedCurrencyRates: any = [];
+					Object.keys(currencyRates).forEach((key) => {
+						if (key.includes('Currency')) {
+							return;
+						}
+						formattedCurrencyRates.push({
+							name: key,
+							rate: Number(currencyRates[key]),
+							currency: currencyRates[`${key}Currency`],
+						});
+					});
+
+					return {
+						url: crypto.url,
+						name: crypto.name,
+						cryptocurrency_rates: formattedCurrencyRates,
+					};
+				}
+			);
+
+		const reportFormatted = {
+			valueCurrency: 'PLN',
+			name: report?.basic?.enforcementAuthority || '',
+			caseNumber: report?.basic?.caseNumber || '',
+			ownerData: report?.basic?.ownerData || '',
+			cryptocurrenciesAmount: formattedCryptoCurrenciesAmount || [],
+			cryptocurrencyManualRates:
+				formattedCryptoCurrenciesManualRates || [],
+		};
+		const reportFormattedReq = _.mapKeys(reportFormatted, (value, key) =>
+			_.snakeCase(key)
+		);
+		const response = await postReportPDF(reportFormattedReq);
+		const blob = new Blob([response?.data], { type: 'application/pdf' });
+		saveAs(blob, 'raport.pdf');
+		console.log(response);
+	};
 
 	return (
 		<Grid container spacing={0}>
@@ -890,7 +934,7 @@ export const App = () => {
 						<CryptoCurrencyWrapper />
 						<CryptoCurrencySourceWrapper />
 						<Button
-							type='submit'
+							onClick={() => sendReport()}
 							color='success'
 							variant='contained'
 						>

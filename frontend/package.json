@@ -1,5 +1,8 @@
 {
   "devDependencies": {
     "@types/lodash": "^4.14.199"
+  },
+  "dependencies": {
+    "file-saver": "^2.0.5"
   }
 }
