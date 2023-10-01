@@ -16,7 +16,7 @@ import {
 	CardActions,
 } from '@mui/material';
 import { useQuery } from 'react-query';
-import { getChiefNames, getCryptoCurrencies } from './api';
+import { getChiefNames, getCryptoCurrencies, postReport } from './api';
 
 const labels = {
 	enforcementAuthority: {
@@ -52,13 +52,13 @@ const cryptoCurrencyDataLabels: any = {
 	},
 };
 
-const cryptoCurrencySourceLabels: any = {
-	exchangeUrl: {
-		name: 'exchangeUrl',
+const cryptoCurrencySourceLabelsDefault: any = {
+	url: {
+		name: 'url',
 		label: 'Adres strony giełdy/kantoru',
 	},
-	exchangeName: {
-		name: 'exchangeName',
+	name: {
+		name: 'name',
 		label: 'Nazwa giełdy/kantoru',
 	},
 	cryptoRate: {
@@ -86,8 +86,7 @@ type CryptoCurrencySource = {
 const DataForm = () => {
 	const {
 		control,
-		handleSubmit,
-		register,
+		watch,
 		formState: { errors },
 	} = useForm({
 		defaultValues: {
@@ -97,6 +96,8 @@ const DataForm = () => {
 		},
 		mode: 'onChange',
 	});
+
+	const watchedFields = watch();
 
 	const { data: chiefNames } = useQuery('chiefNames', getChiefNames);
 
@@ -183,16 +184,26 @@ const DataForm = () => {
 	);
 };
 
-const useDataList = () => {
+const useDataList = (keyData: string) => {
+	const reportContext = React.useContext(ReportContext);
 	const [dataList, setDataList] = React.useState<any[]>([]);
 
 	const onAppend = (data: any) => {
-		setDataList([...dataList, data]);
+		const updatedData = [...dataList, data];
+		setDataList(updatedData);
+		reportContext.setReport((prevValue: any) => ({
+			...prevValue,
+			[keyData]: updatedData,
+		}));
 	};
 
 	const onRemove = (index: number) => {
 		const newList = dataList.filter((_, i) => i !== index);
 		setDataList(newList);
+		reportContext.setReport((prevValue: any) => ({
+			...prevValue,
+			[keyData]: newList,
+		}));
 	};
 
 	return { dataList, onAppend, onRemove };
@@ -202,16 +213,21 @@ export const CryptoCurrencyDataForm = ({ onAppend }: any) => {
 	const {
 		control,
 		handleSubmit,
-		register,
-		watch,
 		formState: { errors },
 	} = useForm();
-  const { data: cryptoCurrencyData, isLoading } = useQuery('cryptoCurrencyData', getCryptoCurrencies);
+	const { data: cryptoCurrencyData, isLoading } = useQuery(
+		'cryptoCurrencyData',
+		getCryptoCurrencies
+	);
 
-  const cryptoCurrencyOptions = cryptoCurrencyData?.map((cryptoCurrency: any) => `${cryptoCurrency.name} (${cryptoCurrency.code})`)
-  if(isLoading){
-    return <div>Ładowanie...</div>
-  }
+	const cryptoCurrencyOptions = cryptoCurrencyData?.map(
+		(cryptoCurrency: any) =>
+			`${cryptoCurrency.name} (${cryptoCurrency.code})`
+	);
+
+	if (isLoading) {
+		return <div>Ładowanie...</div>;
+	}
 
 	return (
 		<Box sx={{ display: 'flex', flexDirection: 'column', gap: '1em' }}>
@@ -277,12 +293,21 @@ export const CryptoCurrencyDataForm = ({ onAppend }: any) => {
 };
 
 export const CryptoCurrencyWrapper = () => {
-	const { dataList, onAppend, onRemove } = useDataList();
+	const { dataList, onAppend, onRemove } = useDataList(
+		'cryptocurrenciesAmount'
+	);
 
 	return (
 		<Box sx={{ display: 'flex', gap: '2em' }}>
 			<CryptoCurrencyDataForm onAppend={onAppend} />
-			<Box sx={{ overflowY: 'auto', maxHeight: '400px', width: '500px', flex: 1 }}>
+			<Box
+				sx={{
+					overflowY: 'auto',
+					maxHeight: '400px',
+					width: '500px',
+					flex: 1,
+				}}
+			>
 				<Grid container spacing={2}>
 					{dataList.map((cryptoCurrencyData, index) => {
 						const labelValues = Object.keys(cryptoCurrencyData).map(
@@ -338,6 +363,10 @@ export const CryptoCurrencySourceForm = ({ onAppend }: any) => {
 		register,
 		formState: { errors },
 	} = useForm();
+	const { data: cryptoCurrencyData } = useQuery(
+		'cryptoCurrencyData',
+		getCryptoCurrencies
+	);
 
 	return (
 		<Box
@@ -356,7 +385,7 @@ export const CryptoCurrencySourceForm = ({ onAppend }: any) => {
 				onSubmit={handleSubmit(onAppend)}
 			>
 				<Controller
-					name={cryptoCurrencySourceLabels.exchangeUrl.name}
+					name={cryptoCurrencySourceLabelsDefault.url.name}
 					control={control}
 					rules={{
 						required: 'Pole wymagane',
@@ -378,7 +407,7 @@ export const CryptoCurrencySourceForm = ({ onAppend }: any) => {
 					)}
 				/>
 				<Controller
-					name={cryptoCurrencySourceLabels.exchangeName.name}
+					name={cryptoCurrencySourceLabelsDefault.name.name}
 					control={control}
 					defaultValue=''
 					rules={{
@@ -387,44 +416,54 @@ export const CryptoCurrencySourceForm = ({ onAppend }: any) => {
 					render={({ field }) => (
 						<TextField
 							label='Nazwa giełdy/kantoru'
-							error={Boolean(errors.exchangeName)}
-							helperText={errors.exchangeName?.message}
+							error={Boolean(errors.name)}
+							helperText={errors.name?.message}
 							variant='outlined'
 							fullWidth
 							{...field}
 						/>
 					)}
 				/>
-				<Box>
-					<Controller
-						name={cryptoCurrencySourceLabels.cryptoRate.name}
-						control={control}
-						rules={{
-							required: 'Pole wymagane',
-						}}
-						defaultValue=''
-						render={({ field }) => (
-							<TextField
-								error={Boolean(errors.cryptoRate)}
-								label='Kurs kryptoaktywa'
-								helperText={errors.cryptoRate?.message}
-								variant='outlined'
-								{...field}
-							/>
-						)}
-					/>
-					<Controller
-						name={cryptoCurrencySourceLabels.currency.name}
-						control={control}
-						defaultValue='PLN'
-						render={({ field }) => (
-							<Select {...field} sx={{ minWidth: 100 }}>
-								<MenuItem value='PLN'>PLN</MenuItem>
-								<MenuItem value='USD'>USD</MenuItem>
-							</Select>
-						)}
-					/>
-				</Box>
+				{cryptoCurrencyData?.length > 0 &&
+					cryptoCurrencyData.map((crypto: any, index: any) => {
+						return (
+							<Box key={index}>
+								<Controller
+									name={`${crypto.code}`}
+									control={control}
+									rules={{
+										required: 'Pole wymagane',
+									}}
+									defaultValue=''
+									render={({ field }) => (
+										<TextField
+											error={Boolean(errors.cryptoRate)}
+											label={`Kurs ${crypto.code}`}
+											helperText={
+												errors.cryptoRate?.message
+											}
+											variant='outlined'
+											{...field}
+										/>
+									)}
+								/>
+								<Controller
+									name={`${crypto.code}Currency`}
+									control={control}
+									defaultValue='PLN'
+									render={({ field }) => (
+										<Select
+											{...field}
+											sx={{ minWidth: 100 }}
+										>
+											<MenuItem value='PLN'>PLN</MenuItem>
+											<MenuItem value='USD'>USD</MenuItem>
+										</Select>
+									)}
+								/>
+							</Box>
+						);
+					})}
 				<Button variant='contained' type='submit'>
 					Dodaj
 				</Button>
@@ -434,7 +473,41 @@ export const CryptoCurrencySourceForm = ({ onAppend }: any) => {
 };
 
 const CryptoCurrencySourceWrapper = () => {
-	const { dataList, onAppend, onRemove } = useDataList();
+	const { dataList, onAppend, onRemove } = useDataList(
+		'cryptocurrencyManualRates'
+	);
+	const { data: cryptoCurrencyData } = useQuery(
+		'cryptoCurrencyData',
+		getCryptoCurrencies
+	);
+
+	const [cryptoCurrencySourceLabels, setCryptoCurrencySourceLabels] =
+		React.useState(cryptoCurrencySourceLabelsDefault);
+
+	React.useEffect(() => {
+		if (cryptoCurrencyData?.length > 0) {
+			const newLabels = cryptoCurrencyData.reduce(
+				(acc: any, crypto: any) => {
+					return {
+						...acc,
+						[crypto.code]: {
+							name: crypto.code,
+							label: `Kurs ${crypto.code}`,
+						},
+						[`${crypto.code}Currency`]: {
+							name: `${crypto.code}Currency`,
+							label: 'Waluta',
+						},
+					};
+				},
+				{}
+			);
+			setCryptoCurrencySourceLabels({
+				...cryptoCurrencySourceLabels,
+				...newLabels,
+			});
+		}
+	}, [cryptoCurrencyData]);
 
 	return (
 		<Box sx={{ display: 'flex', gap: '2em' }}>
@@ -442,14 +515,16 @@ const CryptoCurrencySourceWrapper = () => {
 			<Box sx={{ overflowY: 'auto', maxHeight: '400px' }}>
 				<Grid container spacing={2}>
 					{dataList.map((cryptoCurrencySource, index) => {
+						console.log(dataList, cryptoCurrencySourceLabels);
 						const labelValues = Object.keys(
 							cryptoCurrencySource
 						).map((key: string) => ({
 							label: cryptoCurrencySourceLabels[key].label,
 							value: cryptoCurrencySource[key],
 						}));
+
 						return (
-							<Grid item xs={4} key={index}>
+							<Grid item xs={12} key={index}>
 								<Record
 									labelValues={labelValues}
 									cryptoCurrencySource={cryptoCurrencySource}
@@ -467,12 +542,63 @@ const CryptoCurrencySourceWrapper = () => {
 };
 
 export const ReportPreview = () => {
+	const reportContext = React.useContext(ReportContext);
+	console.log(reportContext);
+
+	const formattedCryptoCurrenciesAmount =
+		reportContext?.report?.cryptocurrenciesAmount?.map((crypto: any) => ({
+			name: crypto.cryptoCurrencyName,
+			amount: crypto.cryptoCurrencyAmount,
+		}));
+
+	const formattedCryptoCurrenciesManualRates =
+		reportContext?.report?.cryptocurrencyManualRates?.map((crypto: any) => {
+			// reomve name and url
+			const { name, url, ...currencyRates } = crypto;
+			// using reduce
+			const formattedCurrencyRates: any = []
+			Object.keys(currencyRates).forEach(key => {
+				if(key.includes('Currency')) {
+					return;
+				}
+				formattedCurrencyRates.push({
+					name: key,
+					rate: currencyRates[key],
+					currency: currencyRates[`${key}Currency`]
+				})
+			});
+
+
+			return {
+				url: crypto.url,
+				name: crypto.name,
+				cryptocurrencyRates: formattedCryptoCurrenciesManualRates,
+			};
+		});
+
+	const reportFormatted = {
+		cryptoCurrenciesAmount: formattedCryptoCurrenciesAmount,
+		cryptoCurrenciesManualRates: formattedCryptoCurrenciesManualRates,
+	};
+
+	React.useEffect(() => {
+		const asyncReq = async (report: any) => {
+			const response = await postReport(report);
+			console.log(response.data)
+		}
+		asyncReq(reportFormatted);
+	}, [reportContext]);
+
+
+
 	return (
 		<Box>
 			<Typography>Podgląd raportu</Typography>
 		</Box>
 	);
 };
+
+const ReportContext = React.createContext<any>({});
 
 export const App = () => {
 	const { control, handleSubmit, register } = useForm({
@@ -482,22 +608,37 @@ export const App = () => {
 			ownerData: '',
 		},
 	});
+	const [report, setReport] = React.useState({});
+	console.log(report);
 
 	return (
 		<Grid container spacing={0}>
-			<Grid item xs={6}>
-				<Box sx={{p:'1em', gap: '2em', display: 'flex', flexDirection: 'column' }}>
-					<DataForm />
-					<CryptoCurrencyWrapper />
-					<CryptoCurrencySourceWrapper />
-					<Button type='submit' color='success' variant='contained'>
-						Wygeneruj raport
-					</Button>
-				</Box>
-			</Grid>
-			<Grid item xs={6}>
-				<ReportPreview />
-			</Grid>
+			<ReportContext.Provider value={{ report, setReport }}>
+				<Grid item xs={6}>
+					<Box
+						sx={{
+							p: '1em',
+							gap: '2em',
+							display: 'flex',
+							flexDirection: 'column',
+						}}
+					>
+						<DataForm />
+						<CryptoCurrencyWrapper />
+						<CryptoCurrencySourceWrapper />
+						<Button
+							type='submit'
+							color='success'
+							variant='contained'
+						>
+							Wygeneruj raport
+						</Button>
+					</Box>
+				</Grid>
+				<Grid item xs={6}>
+					<ReportPreview />
+				</Grid>
+			</ReportContext.Provider>
 		</Grid>
 	);
 };

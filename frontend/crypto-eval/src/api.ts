@@ -8,12 +8,19 @@ const SERVER_URL = `http://${SERVER_HOST}:${SERVER_PORT}/`;
 const ENDPOINTS = {
     CHIEF_NAMES: 'chief-names',
     CRYPTOCURRENCIES: 'cryptocurrencies',
+    REPORT: 'report'
 }
 
 
 export const get = async (path: string) => {
     const url = SERVER_URL + path;
     const response = await axios.get(url);
+    return response.data;
+}
+
+export const post = async (path: string, data: any) => {
+    const url = SERVER_URL + path;
+    const response = await axios.post(url, data);
     return response.data;
 }
 
@@ -25,4 +32,37 @@ export const getChiefNames = async () => {
 
 export const getCryptoCurrencies = async () => {
     return await get(ENDPOINTS.CRYPTOCURRENCIES);
+}
+
+export type CryptocurrencyRate = {
+    name: string,
+    rate: number,
+    currency: string
+}
+
+export type CryptocurrencyAmount = {
+    name: string,
+    quantity: number,
+}
+
+export type CryptocurrencyManualRates = {
+    url: string,
+    name: string,
+    cryptocurrencyRates: CryptocurrencyRate[]
+}
+
+export type Report = {
+    id: string,
+    date: string,
+    valueCurrency: string,
+
+    name: string,
+    caseNumber: string,
+    ownerData: string,
+    cryptocurrenciesAmount: CryptocurrencyAmount[]
+    cryptocurrencyManualRates: CryptocurrencyManualRates[]
+}
+
+export const postReport = async (report: any) => {
+    return await post(ENDPOINTS.REPORT, report);
 }
