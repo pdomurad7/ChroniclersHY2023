@@ -70,6 +70,8 @@ class Kraken(ICantor):
         )
         self.mapping = {
             "BTC": "XBT",
+            "ETH": "ETH",
+            "CITY": "CITY",
         }
 
     def _get_url(self, cryptocurrency_name: str, currency: str):

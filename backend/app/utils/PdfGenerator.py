@@ -46,10 +46,10 @@ class PdfGenerator:
             self.pdf.add_line()
             for cryptocurrency in exchange["cryptocurrency_rates"]:
                 self.pdf.chapter_body(f"Cryptocurrency Code: {cryptocurrency['code']}")
-                self.pdf.chapter_body(f"USD Rate: {cryptocurrency['USD_rate'] or 'Brak'}")
-                self.pdf.chapter_body(f"PLN Rate: {cryptocurrency['PLN_rate']}")
+                if cryptocurrency["USD_rate"]:
+                    self.pdf.chapter_body(f"USD Rate: {cryptocurrency['USD_rate']}")
                 self.pdf.chapter_body(
-                    f"Converted from USD: {cryptocurrency['converted_from_USD']}"
+                    f"PLN Rate: {cryptocurrency['PLN_rate']} {'(converted)' if cryptocurrency['converted_from_USD'] else ''}"
                 )
                 self.pdf.chapter_body(f"Value: {cryptocurrency['value']}")
             self.pdf.add_line()

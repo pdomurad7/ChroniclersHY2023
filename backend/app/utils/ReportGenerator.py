@@ -71,7 +71,7 @@ class ReportGenerator:
                         crypto_rate["converted_from_USD"] = True
                         crypto_rate["USD_rate"] = float(result_rate["result"])
                         crypto_rate["PLN_rate"] = (
-                            result_rate["result"] * self.nbp_usd_rate
+                            crypto_rate["USD_rate"] * self.nbp_usd_rate
                         )
                     else:
                         crypto_rate["converted_from_USD"] = False
