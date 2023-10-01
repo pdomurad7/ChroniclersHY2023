@@ -22,14 +22,12 @@ class CryptocurrencyManualRates(BaseModel):
 
 
 class Report(BaseModel):
-    name: str
-    id: str
-    date: str
-    case_number: str
-    owner_data: str
-    value_currency: str
-    cryptocurrencies_amount: list[CryptocurrencyAmount]
-    cryptocurrency_manual_rates: list[CryptocurrencyManualRates]
+    name: str | None = None
+    case_number: str | None = None
+    owner_data: str | None = None
+    value_currency: str | None = None
+    cryptocurrencies_amount: list[CryptocurrencyAmount] | None = None
+    cryptocurrency_manual_rates: list[CryptocurrencyManualRates] | None = None
 
 
 class CryptocurrencyAverageValue(BaseModel):
