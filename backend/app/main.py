@@ -1,15 +1,18 @@
 import json
+import logging.config
 
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi import Response
 from fastapi.middleware.cors import CORSMiddleware
 
-from config import settings
+from config import settings, logging_settings
 from dependecies import get_db
 from models import Report, ResponseReport
 from services import get_current_supported_currencies
 from services import get_report_calculations
 from utils.PdfGenerator import PdfGenerator
+
+logging.config.dictConfig(logging_settings)
 
 app = FastAPI()
 

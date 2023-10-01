@@ -1,13 +1,20 @@
 import datetime
+import logging
 import uuid
 
 import requests
 
 from cantors.CantorInterface import known_cantors
+from config import settings
+
+logger = logging.getLogger(settings.PROJECT_NAME)
 
 
 class ReportGenerator:
     def __init__(self, previous_report_data: dict, db):
+        logger.info(
+            f"Generating report {previous_report_data['name']} with id {previous_report_data['id']} for user {previous_report_data['owner_data']}"
+        )
         self.report_header = {
             "name": previous_report_data["name"],
             "id": uuid.uuid4().hex,
@@ -21,6 +28,12 @@ class ReportGenerator:
         self.cryptocurrency_manual_rates = previous_report_data[
             "cryptocurrency_manual_rates"
         ]
+        logger.info(
+            f"User {previous_report_data['owner_data']} cryptocurrencies amount: {self.cryptocurrencies_amount}"
+        )
+        logger.info(
+            f"User {previous_report_data['owner_data']} manual rates: {self.cryptocurrency_manual_rates}"
+        )
         self.nbp_usd_rate = self._get_nbp_usd_rate()
         self.db = db
         self.cryptocurrencies_data = []
@@ -32,6 +45,7 @@ class ReportGenerator:
         report = self.report_header
         report["cryptocurrencies_data"] = self.cryptocurrencies_data
         report["exchange_data"] = self.exchange_data
+        logger.info(f"Generated report {report}")
         return report
 
     def _update_exchange_data(self):
@@ -54,7 +68,9 @@ class ReportGenerator:
                             cryptocurrency_dict["data_sources"].append(cantor["name"])
                         cryptocurrency_dict["avg_value"] += rate["value"]
             cryptocurrency_dict["avg_value"] /= len(cryptocurrency_dict["data_sources"])
-            cryptocurrency_dict["avg_value"] = round(cryptocurrency_dict["avg_value"], 2)
+            cryptocurrency_dict["avg_value"] = round(
+                cryptocurrency_dict["avg_value"], 2
+            )
             self.cryptocurrencies_data.append(cryptocurrency_dict)
 
     def _known_cantors_rates(self):

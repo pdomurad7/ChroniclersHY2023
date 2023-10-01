@@ -1,8 +1,16 @@
+import logging
+
+from config import settings
 from models import PDF
+
+logger = logging.getLogger(settings.PROJECT_NAME)
 
 
 class PdfGenerator:
     def __init__(self, data: dict):
+        logger.info(
+            f"Generating pdf for report {data['name']} with id {data['id']} for user {data['owner_data']}"
+        )
         self.data = data
         self.pdf = PDF()
         self.pdf.add_page()
