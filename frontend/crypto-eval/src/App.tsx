@@ -515,6 +515,7 @@ export const CryptoCurrencySourceForm = ({ onAppend }: any) => {
 										<Select
 											{...field}
 											sx={{ minWidth: 100 }}
+											label={`Waluta kursu`}
 										>
 											<MenuItem value='PLN'>PLN</MenuItem>
 											<MenuItem value='USD'>USD</MenuItem>
@@ -632,9 +633,9 @@ export const ReportPreview = () => {
 			quantity: Number(crypto.cryptoCurrencyAmount),
 		}));
 	const formattedCryptoCurrenciesManualRates =
-		reportContext?.report?.cryptocurrencyManualRates?.map((crypto: any) => {
+		reportContext?.report?.cryptocurrencyManualRates?.map((cantor: any) => {
 			// reomve name and url
-			const { name, url, ...currencyRates } = crypto;
+			const { name, url, ...currencyRates } = cantor;
 			// using reduce
 			const formattedCurrencyRates: any = [];
 			Object.keys(currencyRates).forEach((key) => {
@@ -642,15 +643,15 @@ export const ReportPreview = () => {
 					return;
 				}
 				formattedCurrencyRates.push({
-					name: key,
+					code: key,
 					rate: Number(currencyRates[key]),
 					currency: currencyRates[`${key}Currency`],
 				});
 			});
 
 			return {
-				url: crypto.url,
-				name: crypto.name,
+				url: cantor.url,
+				name: cantor.name,
 				cryptocurrency_rates: formattedCurrencyRates,
 			};
 		});
@@ -869,7 +870,7 @@ export const App = () => {
 		const formattedCryptoCurrenciesAmount =
 			report?.cryptocurrenciesAmount?.map(
 				(crypto: any) => ({
-					name: report.currencyMapper[
+					code: report.currencyMapper[
 						crypto.cryptoCurrencyName
 					].code,
 					quantity: Number(crypto.cryptoCurrencyAmount),
@@ -877,9 +878,9 @@ export const App = () => {
 			);
 		const formattedCryptoCurrenciesManualRates =
 			report?.cryptocurrencyManualRates?.map(
-				(crypto: any) => {
+				(cantor: any) => {
 					// reomve name and url
-					const { name, url, ...currencyRates } = crypto;
+					const { name, url, ...currencyRates } = cantor;
 					// using reduce
 					const formattedCurrencyRates: any = [];
 					Object.keys(currencyRates).forEach((key) => {
@@ -894,16 +895,17 @@ export const App = () => {
 					});
 
 					return {
-						url: crypto.url,
-						name: crypto.name,
+						url: cantor.url,
+						name: cantor.name,
 						cryptocurrency_rates: formattedCurrencyRates,
 					};
 				}
 			);
 
 		const reportFormatted = {
-			valueCurrency: 'PLN',
-			name: report?.basic?.enforcementAuthority || '',
+			// valueCurrency: 'PLN',
+			// title: 'Report XD'
+			officerName: report?.basic?.enforcementAuthority || '',
 			caseNumber: report?.basic?.caseNumber || '',
 			ownerData: report?.basic?.ownerData || '',
 			cryptocurrenciesAmount: formattedCryptoCurrenciesAmount || [],
