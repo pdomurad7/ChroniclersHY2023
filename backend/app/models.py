@@ -5,13 +5,13 @@ from pydantic import BaseModel
 
 
 class CryptocurrencyRate(BaseModel):
-    name: str
+    code: str
     rate: float
     currency: str
 
 
 class CryptocurrencyAmount(BaseModel):
-    name: str
+    code: str
     quantity: float
 
 
@@ -23,21 +23,21 @@ class CryptocurrencyManualRates(BaseModel):
 
 class Report(BaseModel):
     title: str | None = "Assessing values of crypto-assets"
-    name: str | None = None  # name of the tax chief officer
+    officer_name: str | None = None  # name of the tax chief officer
     case_number: str | None = None
     owner_data: str | None = None
-    value_currency: str | None = None
+    value_currency: str = "PLN"
     cryptocurrencies_amount: list[CryptocurrencyAmount] | None = None
     cryptocurrency_manual_rates: list[CryptocurrencyManualRates] | None = None
 
 
 class CryptocurrencyAverageValue(BaseModel):
-    name: str
+    code: str
     quantity: float
 
 
 class SingleCryptocurrenciesData(BaseModel):
-    name: str
+    code: str
     quantity: float
     data_sources: list[str]
     avg_value: float
@@ -60,7 +60,7 @@ class CantorData(BaseModel):
 
 
 class ResponseReport(BaseModel):
-    name: str
+    title: str
     officer_name: str
     id: str
     date: str

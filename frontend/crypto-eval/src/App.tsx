@@ -627,7 +627,7 @@ export const ReportPreview = () => {
 
 	const formattedCryptoCurrenciesAmount =
 		reportContext?.report?.cryptocurrenciesAmount?.map((crypto: any) => ({
-			name: reportContext.report.currencyMapper[crypto.cryptoCurrencyName]
+			code: reportContext.report.currencyMapper[crypto.cryptoCurrencyName]
 				.code,
 			quantity: Number(crypto.cryptoCurrencyAmount),
 		}));
@@ -656,8 +656,9 @@ export const ReportPreview = () => {
 		});
 
 	const reportFormatted = {
-		valueCurrency: 'PLN',
-		name: reportContext?.report?.basic?.enforcementAuthority || '',
+		// valueCurrency: 'PLN',
+		// title: 'Report XD'
+		officerName: reportContext?.report?.basic?.enforcementAuthority || '',
 		caseNumber: reportContext?.report?.basic?.caseNumber || '',
 		ownerData: reportContext?.report?.basic?.ownerData || '',
 		cryptocurrenciesAmount: formattedCryptoCurrenciesAmount || [],
@@ -698,7 +699,7 @@ export const ReportPreview = () => {
 			<Divider sx={{ mt: '1em', mb: '1em' }} />
 			<Box>
 				<InputLabel>Nazwa organu egzekucyjnego</InputLabel>
-				<Typography>{reportPreview.name}</Typography>
+				<Typography>{reportPreview.officer_name}</Typography>
 			</Box>
 			<Box>
 				<InputLabel>Dane właściciela kryptoaktywa</InputLabel>
@@ -886,7 +887,7 @@ export const App = () => {
 							return;
 						}
 						formattedCurrencyRates.push({
-							name: key,
+							code: key,
 							rate: Number(currencyRates[key]),
 							currency: currencyRates[`${key}Currency`],
 						});
