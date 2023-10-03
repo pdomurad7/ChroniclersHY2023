@@ -141,7 +141,7 @@ const DataForm = () => {
 				control={control}
 				render={({ field }) => (
 					<>
-						<Select
+						<TextField
 							{...field}
 							id='enforcementAuthority'
 							label={labels.enforcementAuthority.label}
@@ -150,13 +150,19 @@ const DataForm = () => {
 									color: 'black',
 								},
 							}}
+							select
 						>
+							{chiefNames?.length === 0 && (
+								<MenuItem value="">
+									<em>No options available</em>
+								</MenuItem>
+							)}
 							{chiefNames?.map((name: any, index: any) => (
 								<MenuItem key={index} value={name}>
 									{name}
 								</MenuItem>
 							))}
-						</Select>
+						</TextField>
 					</>
 				)}
 			/>
@@ -487,7 +493,14 @@ export const CryptoCurrencySourceForm = ({ onAppend }: any) => {
 				{uniqueCryptoCurrencyNames?.length > 0 &&
 					uniqueCryptoCurrencyNames.map((crypto: any, index: any) => {
 						return (
-							<Box key={index}>
+							<Box
+								key={index}
+								sx={{
+									display: 'flex',
+									gap: '1em',
+									alignItems: 'center',
+									}}
+							>
 								<Controller
 									name={`${crypto}`}
 									control={control}
@@ -512,14 +525,15 @@ export const CryptoCurrencySourceForm = ({ onAppend }: any) => {
 									control={control}
 									defaultValue='PLN'
 									render={({ field }) => (
-										<Select
+										<TextField
 											{...field}
+											label='Waluta kursu'
 											sx={{ minWidth: 100 }}
-											label={`Waluta kursu`}
+											select
 										>
 											<MenuItem value='PLN'>PLN</MenuItem>
 											<MenuItem value='USD'>USD</MenuItem>
-										</Select>
+										</TextField>
 									)}
 								/>
 							</Box>
@@ -735,8 +749,12 @@ export const ReportPreview = () => {
 						>
 							<InputLabel>Kryptowaluta</InputLabel>
 							<Typography>{crypto.code}</Typography>
+							<InputLabel>Ilość</InputLabel>
+							<Typography>{crypto.quantity}</Typography>
 							<InputLabel>Średnia wartość (PLN)</InputLabel>
 							<Typography>{crypto.avg_value}</Typography>
+							<InputLabel>Średni kurs USD (NBP)</InputLabel>
+							<Typography>{crypto.NBP_USD_rate}</Typography>
 
 							<InputLabel>Źródła danych</InputLabel>
 							{crypto.data_sources.map(
@@ -789,14 +807,6 @@ export const ReportPreview = () => {
 													marginTop: '10px',
 												}}
 											>
-												<Box>
-													<InputLabel>
-														Kurs NBP USD
-													</InputLabel>
-													<Typography>
-														{rate.NBP_USD_rate}
-													</Typography>
-												</Box>
 												<Box>
 													<InputLabel>
 														Kurs PLN
