@@ -141,7 +141,7 @@ const DataForm = () => {
 				control={control}
 				render={({ field }) => (
 					<>
-						<Select
+						<TextField
 							{...field}
 							id='enforcementAuthority'
 							label={labels.enforcementAuthority.label}
@@ -150,13 +150,19 @@ const DataForm = () => {
 									color: 'black',
 								},
 							}}
+							select
 						>
+							{chiefNames?.length === 0 && (
+								<MenuItem value="">
+									<em>No options available</em>
+								</MenuItem>
+							)}
 							{chiefNames?.map((name: any, index: any) => (
 								<MenuItem key={index} value={name}>
 									{name}
 								</MenuItem>
 							))}
-						</Select>
+						</TextField>
 					</>
 				)}
 			/>
@@ -170,7 +176,7 @@ const DataForm = () => {
 						message: 'Maksymalna długość to 100 znaków',
 					},
 					pattern: {
-						value: /^[A-Za-z0-9./-]+$/,
+						value: /^[A-Za-z0-9żźćńółęąśŻŹĆĄŚĘŁÓŃ./-]+$/,
 						message:
 							'Poprawny format powinien zawierać tylko litery, cyfry, znaki ".", "-" oraz "/"',
 					},
@@ -197,9 +203,9 @@ const DataForm = () => {
 						message: 'Maksymalna długość to 100 znaków',
 					},
 					pattern: {
-						value: /^[A-Za-z0-9.-]+$/,
+						value: /^[A-Za-z0-9żźćńółęąśŻŹĆĄŚĘŁÓŃ .-]+$/,
 						message:
-							'Poprawny format powinien zawierać tylko litery, cyfry oraz znaki "-", "."',
+							'Poprawny format powinien zawierać tylko litery, cyfry oraz znaki "-", "." i " "',
 					},
 				}}
 				render={({ field }) => (
@@ -487,7 +493,14 @@ export const CryptoCurrencySourceForm = ({ onAppend }: any) => {
 				{uniqueCryptoCurrencyNames?.length > 0 &&
 					uniqueCryptoCurrencyNames.map((crypto: any, index: any) => {
 						return (
-							<Box key={index}>
+							<Box
+								key={index}
+								sx={{
+									display: 'flex',
+									gap: '1em',
+									alignItems: 'center',
+									}}
+							>
 								<Controller
 									name={`${crypto}`}
 									control={control}
@@ -512,13 +525,15 @@ export const CryptoCurrencySourceForm = ({ onAppend }: any) => {
 									control={control}
 									defaultValue='PLN'
 									render={({ field }) => (
-										<Select
+										<TextField
 											{...field}
+											label='Waluta kursu'
 											sx={{ minWidth: 100 }}
+											select
 										>
 											<MenuItem value='PLN'>PLN</MenuItem>
 											<MenuItem value='USD'>USD</MenuItem>
-										</Select>
+										</TextField>
 									)}
 								/>
 							</Box>
@@ -627,14 +642,14 @@ export const ReportPreview = () => {
 
 	const formattedCryptoCurrenciesAmount =
 		reportContext?.report?.cryptocurrenciesAmount?.map((crypto: any) => ({
-			name: reportContext.report.currencyMapper[crypto.cryptoCurrencyName]
+			code: reportContext.report.currencyMapper[crypto.cryptoCurrencyName]
 				.code,
 			quantity: Number(crypto.cryptoCurrencyAmount),
 		}));
 	const formattedCryptoCurrenciesManualRates =
-		reportContext?.report?.cryptocurrencyManualRates?.map((crypto: any) => {
+		reportContext?.report?.cryptocurrencyManualRates?.map((cantor: any) => {
 			// reomve name and url
-			const { name, url, ...currencyRates } = crypto;
+			const { name, url, ...currencyRates } = cantor;
 			// using reduce
 			const formattedCurrencyRates: any = [];
 			Object.keys(currencyRates).forEach((key) => {
@@ -642,22 +657,23 @@ export const ReportPreview = () => {
 					return;
 				}
 				formattedCurrencyRates.push({
-					name: key,
+					code: key,
 					rate: Number(currencyRates[key]),
 					currency: currencyRates[`${key}Currency`],
 				});
 			});
 
 			return {
-				url: crypto.url,
-				name: crypto.name,
+				url: cantor.url,
+				name: cantor.name,
 				cryptocurrency_rates: formattedCurrencyRates,
 			};
 		});
 
 	const reportFormatted = {
-		valueCurrency: 'PLN',
-		name: reportContext?.report?.basic?.enforcementAuthority || '',
+		// valueCurrency: 'PLN',
+		// title: 'Report XD'
+		officerName: reportContext?.report?.basic?.enforcementAuthority || '',
 		caseNumber: reportContext?.report?.basic?.caseNumber || '',
 		ownerData: reportContext?.report?.basic?.ownerData || '',
 		cryptocurrenciesAmount: formattedCryptoCurrenciesAmount || [],
@@ -698,7 +714,7 @@ export const ReportPreview = () => {
 			<Divider sx={{ mt: '1em', mb: '1em' }} />
 			<Box>
 				<InputLabel>Nazwa organu egzekucyjnego</InputLabel>
-				<Typography>{reportPreview.name}</Typography>
+				<Typography>{reportPreview.officer_name}</Typography>
 			</Box>
 			<Box>
 				<InputLabel>Dane właściciela kryptoaktywa</InputLabel>
@@ -720,6 +736,41 @@ export const ReportPreview = () => {
 				<InputLabel>Metoda wyliczenia średniej</InputLabel>
 				<Typography>{reportPreview.calculation_method}</Typography>
 			</Box>
+			<Divider sx={{ mt: '1em', mb: '1em' }} />
+
+			{reportPreview.cryptocurrencies_data.map(
+				(crypto: any, index: any) => {
+					return (
+						<Box
+							key={index}
+							sx={{
+								marginTop: '10px',
+							}}
+						>
+							<InputLabel>Kryptowaluta</InputLabel>
+							<Typography>{crypto.code}</Typography>
+							<InputLabel>Ilość</InputLabel>
+							<Typography>{crypto.quantity}</Typography>
+							<InputLabel>Średnia wartość (PLN)</InputLabel>
+							<Typography>{crypto.avg_value}</Typography>
+							<InputLabel>Średni kurs USD (NBP)</InputLabel>
+							<Typography>{crypto.NBP_USD_rate}</Typography>
+
+							<InputLabel>Źródła danych</InputLabel>
+							{crypto.data_sources.map(
+								(source: any, index: any) => {
+									return (
+										<Box key={index}>
+											<Typography>- {source}</Typography>
+										</Box>
+									);
+								}
+							)}
+						</Box>
+					);
+				}
+			)}
+
 			<Divider sx={{ mt: '1em', mb: '1em' }} />
 
 			{reportPreview.exchange_data.map(
@@ -756,14 +807,6 @@ export const ReportPreview = () => {
 													marginTop: '10px',
 												}}
 											>
-												<Box>
-													<InputLabel>
-														Kurs NBP USD
-													</InputLabel>
-													<Typography>
-														{rate.NBP_USD_rate}
-													</Typography>
-												</Box>
 												<Box>
 													<InputLabel>
 														Kurs PLN
@@ -824,37 +867,6 @@ export const ReportPreview = () => {
 					);
 				}
 			)}
-
-			<Divider sx={{ mt: '1em', mb: '1em' }} />
-
-			{reportPreview.cryptocurrencies_data.map(
-				(crypto: any, index: any) => {
-					return (
-						<Box
-							key={index}
-							sx={{
-								marginTop: '10px',
-							}}
-						>
-							<InputLabel>Kryptowaluta</InputLabel>
-							<Typography>{crypto.name}</Typography>
-							<InputLabel>Średnia wartość (PLN)</InputLabel>
-							<Typography>{crypto.avg_value}</Typography>
-
-							<InputLabel>Źródła danych</InputLabel>
-							{crypto.data_sources.map(
-								(source: any, index: any) => {
-									return (
-										<Box key={index}>
-											<Typography>- {source}</Typography>
-										</Box>
-									);
-								}
-							)}
-						</Box>
-					);
-				}
-			)}
 		</Box>
 	);
 };
@@ -868,7 +880,7 @@ export const App = () => {
 		const formattedCryptoCurrenciesAmount =
 			report?.cryptocurrenciesAmount?.map(
 				(crypto: any) => ({
-					name: report.currencyMapper[
+					code: report.currencyMapper[
 						crypto.cryptoCurrencyName
 					].code,
 					quantity: Number(crypto.cryptoCurrencyAmount),
@@ -876,9 +888,9 @@ export const App = () => {
 			);
 		const formattedCryptoCurrenciesManualRates =
 			report?.cryptocurrencyManualRates?.map(
-				(crypto: any) => {
+				(cantor: any) => {
 					// reomve name and url
-					const { name, url, ...currencyRates } = crypto;
+					const { name, url, ...currencyRates } = cantor;
 					// using reduce
 					const formattedCurrencyRates: any = [];
 					Object.keys(currencyRates).forEach((key) => {
@@ -886,23 +898,24 @@ export const App = () => {
 							return;
 						}
 						formattedCurrencyRates.push({
-							name: key,
+							code: key,
 							rate: Number(currencyRates[key]),
 							currency: currencyRates[`${key}Currency`],
 						});
 					});
 
 					return {
-						url: crypto.url,
-						name: crypto.name,
+						url: cantor.url,
+						name: cantor.name,
 						cryptocurrency_rates: formattedCurrencyRates,
 					};
 				}
 			);
 
 		const reportFormatted = {
-			valueCurrency: 'PLN',
-			name: report?.basic?.enforcementAuthority || '',
+			// valueCurrency: 'PLN',
+			// title: 'Report XD'
+			officerName: report?.basic?.enforcementAuthority || '',
 			caseNumber: report?.basic?.caseNumber || '',
 			ownerData: report?.basic?.ownerData || '',
 			cryptocurrenciesAmount: formattedCryptoCurrenciesAmount || [],

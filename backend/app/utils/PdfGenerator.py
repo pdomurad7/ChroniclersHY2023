@@ -9,7 +9,7 @@ logger = logging.getLogger(settings.PROJECT_NAME)
 class PdfGenerator:
     def __init__(self, data: dict):
         logger.info(
-            f"Generating pdf for report {data['name']} with id {data['id']} for user {data['owner_data']}"
+            f"Generating pdf for report {data['title']} with id {data['id']} for user {data['owner_data']}"
         )
         self.data = data
         self.pdf = PDF()
@@ -24,7 +24,7 @@ class PdfGenerator:
     def _add_general_information(self):
         self.pdf.chapter_title("General Information", align="C")
         self.pdf.add_line()
-        self.pdf.chapter_body(f"Report Name: {self.data['name']}")
+        self.pdf.chapter_body(f"Report Name: {self.data['title']}")
         self.pdf.chapter_body(f"Report ID: {self.data['id']}")
         self.pdf.chapter_body(f"Date: {self.data['date']}")
         self.pdf.chapter_body(f"Case Number: {self.data['case_number']}")
@@ -36,7 +36,7 @@ class PdfGenerator:
         self.pdf.chapter_title("Cryptocurrency Data", align="C")
         self.pdf.add_line()
         for cryptocurrency in self.data["cryptocurrencies_data"]:
-            self.pdf.chapter_title(f"Cryptocurrency Name: {cryptocurrency['name']}")
+            self.pdf.chapter_title(f"Cryptocurrency Name: {cryptocurrency['code']}")
             self.pdf.chapter_body(f"Quantity: {cryptocurrency['quantity']}")
             self.pdf.chapter_body(
                 f"NBP USD Avg. Rate: {cryptocurrency['NBP_USD_rate']:.2f}"

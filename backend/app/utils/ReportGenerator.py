@@ -13,16 +13,17 @@ logger = logging.getLogger(settings.PROJECT_NAME)
 class ReportGenerator:
     def __init__(self, previous_report_data: dict, db):
         self.report_header = {
-            "name": previous_report_data["name"],
+            "title": previous_report_data["title"],
             "id": uuid.uuid4().hex,
             "date": str(datetime.datetime.now().strftime("%d.%m.%Y")),
+            "officer_name": previous_report_data["officer_name"],
             "case_number": previous_report_data["case_number"],
             "owner_data": previous_report_data["owner_data"],
             "value_currency": previous_report_data["value_currency"],
             "calculation_method": "Average of all available rates",
         }
         logger.info(
-            f"Generating report {previous_report_data['name']} with id {self.report_header['id']} for user {previous_report_data['owner_data']}"
+            f"Generating report {previous_report_data['title']} with id {self.report_header['id']} for user {previous_report_data['owner_data']}"
         )
         self.cryptocurrencies_amount = previous_report_data["cryptocurrencies_amount"]
         self.cryptocurrency_manual_rates = previous_report_data[
@@ -55,7 +56,7 @@ class ReportGenerator:
     def _update_cryptocurrencies_data(self):
         for cryptocurrency in self.cryptocurrencies_amount:
             cryptocurrency_dict = {
-                "name": cryptocurrency["name"],
+                "code": cryptocurrency["code"],
                 "quantity": cryptocurrency["quantity"],
                 "data_sources": [],
                 "avg_value": 0,
@@ -63,7 +64,7 @@ class ReportGenerator:
             }
             for cantor in self.exchange_data:
                 for rate in cantor["cryptocurrency_rates"]:
-                    if rate["code"] == cryptocurrency["name"]:
+                    if rate["code"] == cryptocurrency["code"]:
                         if cantor["name"] not in cryptocurrency_dict["data_sources"]:
                             cryptocurrency_dict["data_sources"].append(cantor["name"])
                         cryptocurrency_dict["avg_value"] += rate["value"]
@@ -80,7 +81,7 @@ class ReportGenerator:
             }
             for cryptocurrency in self.cryptocurrencies_amount:
                 crypto_rate = {}
-                result_rate = cantor_obj.get_rate(cryptocurrency["name"])
+                result_rate = cantor_obj.get_rate(cryptocurrency["code"])
                 if result_rate is not None:
                     if result_rate["currency"] == "USD":
                         crypto_rate["converted_from_USD"] = True
@@ -91,7 +92,7 @@ class ReportGenerator:
                     else:
                         crypto_rate["converted_from_USD"] = False
                         crypto_rate["PLN_rate"] = result_rate["result"]
-                    crypto_rate["code"] = cryptocurrency["name"]
+                    crypto_rate["code"] = cryptocurrency["code"]
                     crypto_rate["quantity"] = cryptocurrency["quantity"]
                     crypto_rate["value"] = (
                         float(crypto_rate["PLN_rate"]) * cryptocurrency["quantity"]
@@ -110,8 +111,8 @@ class ReportGenerator:
             for cryptocurrency in self.cryptocurrencies_amount:
                 crypto_rate = {}
                 for rate in cantor["cryptocurrency_rates"]:
-                    if rate["name"] == cryptocurrency["name"]:
-                        crypto_rate["code"] = cryptocurrency["name"]
+                    if rate["code"] == cryptocurrency["code"]:
+                        crypto_rate["code"] = cryptocurrency["code"]
                         crypto_rate["quantity"] = cryptocurrency["quantity"]
                         if rate["currency"] == "USD":
                             crypto_rate["converted_from_USD"] = True

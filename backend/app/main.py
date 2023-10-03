@@ -52,7 +52,7 @@ def get_report_pdf(report: Report):
         raise HTTPException(status_code=500, detail=str(e))
 
     # Prepare the filename and headers
-    filename = f"{report['name']}_{report['id']}.pdf"
+    filename = f"{report['title']}_{report['id']}.pdf"
     headers = {"Content-Disposition": f"attachment; filename={filename}"}
 
     # Return the file as a response
