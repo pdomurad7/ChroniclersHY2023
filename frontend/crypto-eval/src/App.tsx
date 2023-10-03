@@ -170,7 +170,7 @@ const DataForm = () => {
 						message: 'Maksymalna długość to 100 znaków',
 					},
 					pattern: {
-						value: /^[A-Za-z0-9./-]+$/,
+						value: /^[A-Za-z0-9żźćńółęąśŻŹĆĄŚĘŁÓŃ./-]+$/,
 						message:
 							'Poprawny format powinien zawierać tylko litery, cyfry, znaki ".", "-" oraz "/"',
 					},
@@ -197,9 +197,9 @@ const DataForm = () => {
 						message: 'Maksymalna długość to 100 znaków',
 					},
 					pattern: {
-						value: /^[A-Za-z0-9.-]+$/,
+						value: /^[A-Za-z0-9żźćńółęąśŻŹĆĄŚĘŁÓŃ .-]+$/,
 						message:
-							'Poprawny format powinien zawierać tylko litery, cyfry oraz znaki "-", "."',
+							'Poprawny format powinien zawierać tylko litery, cyfry oraz znaki "-", "." i " "',
 					},
 				}}
 				render={({ field }) => (
@@ -723,6 +723,37 @@ export const ReportPreview = () => {
 			</Box>
 			<Divider sx={{ mt: '1em', mb: '1em' }} />
 
+			{reportPreview.cryptocurrencies_data.map(
+				(crypto: any, index: any) => {
+					return (
+						<Box
+							key={index}
+							sx={{
+								marginTop: '10px',
+							}}
+						>
+							<InputLabel>Kryptowaluta</InputLabel>
+							<Typography>{crypto.code}</Typography>
+							<InputLabel>Średnia wartość (PLN)</InputLabel>
+							<Typography>{crypto.avg_value}</Typography>
+
+							<InputLabel>Źródła danych</InputLabel>
+							{crypto.data_sources.map(
+								(source: any, index: any) => {
+									return (
+										<Box key={index}>
+											<Typography>- {source}</Typography>
+										</Box>
+									);
+								}
+							)}
+						</Box>
+					);
+				}
+			)}
+
+			<Divider sx={{ mt: '1em', mb: '1em' }} />
+
 			{reportPreview.exchange_data.map(
 				(exchange_data: any, index: any) => {
 					return (
@@ -820,37 +851,6 @@ export const ReportPreview = () => {
 										Brak danych dla tego kantoru
 									</InputLabel>
 								</Box>
-							)}
-						</Box>
-					);
-				}
-			)}
-
-			<Divider sx={{ mt: '1em', mb: '1em' }} />
-
-			{reportPreview.cryptocurrencies_data.map(
-				(crypto: any, index: any) => {
-					return (
-						<Box
-							key={index}
-							sx={{
-								marginTop: '10px',
-							}}
-						>
-							<InputLabel>Kryptowaluta</InputLabel>
-							<Typography>{crypto.name}</Typography>
-							<InputLabel>Średnia wartość (PLN)</InputLabel>
-							<Typography>{crypto.avg_value}</Typography>
-
-							<InputLabel>Źródła danych</InputLabel>
-							{crypto.data_sources.map(
-								(source: any, index: any) => {
-									return (
-										<Box key={index}>
-											<Typography>- {source}</Typography>
-										</Box>
-									);
-								}
 							)}
 						</Box>
 					);
